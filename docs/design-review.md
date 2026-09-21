@@ -96,6 +96,28 @@ The design is better-specified than most FSM builds. Worth naming so we don't "f
   safe substrate a future AI layer drives (see §4).
 - **Lands in:** Phase 1, alongside the `jobs` / `job_events` build.
 
+### 2.5 Dispatch model — assigned vs. pull — DECIDED
+
+- **Question.** Should technicians see the main jobs board and freely pick unassigned jobs
+  (a self-serve "pull" pool), or only see jobs assigned to them (dispatcher-driven "push")?
+- **Why it matters.** A free-for-all pull board fights core goals: cherry-picking (easy/near
+  jobs grabbed, hard/far ones left), blurred SLA accountability (the enterprise data asset
+  depends on "who owned this, when"), no load balancing (the "measured bandwidth" goal), race
+  conditions on the same job, and a return to the ad-hoc reactive dispatch this system exists
+  to kill. It's also a **security-boundary** change — technicians currently can't even *see*
+  unassigned jobs (RLS: "own assigned jobs only").
+- **The real tension.** A *pure* push model makes the single dispatcher (Mervyn) a single
+  point of failure — which contradicts Goal #2 ("no workflow depends on one named person").
+- **Decision — assigned-only, solve the SPOF at the role level.** Technicians stay
+  assigned-only (they do not see the main board). The dispatcher-SPOF is addressed by
+  **role-based redundancy** — allow more than one person to dispatch (a backup dispatcher /
+  second `ops_manager`), cheap because roles are lookup rows — **not** by exposing the board
+  to technicians. A controlled "available jobs" claim pool (claim within zone/skills, claim as
+  an auditable event, with guardrails) is **parked as a deliberate Phase-2+ feature**, not a
+  raw open board.
+- **Lands in:** Phase 1 keeps assigned-only RLS; role redundancy is a data/role decision;
+  claim-pool is deferred and explicitly out of MVP unless pulled forward on purpose.
+
 ---
 
 ## 3. Recorded, but not forced (lower priority)
