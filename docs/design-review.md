@@ -118,6 +118,39 @@ The design is better-specified than most FSM builds. Worth naming so we don't "f
 - **Lands in:** Phase 1 keeps assigned-only RLS; role redundancy is a data/role decision;
   claim-pool is deferred and explicitly out of MVP unless pulled forward on purpose.
 
+### 2.6 Asset registration & duplicate prevention — DECIDED
+
+- **Question.** When a technician registers an asset on-site, do we validate for duplicates,
+  and how does a technician know what assets already exist (they can't browse the registry)?
+- **Context that changes the answer.** The REI tracking label is issued **manually by admin
+  (Christine), with no system logic today** — so a duplicate label can be issued at the
+  source; the label is **not reliably unique in the real world**. Separately, technicians
+  cannot browse the asset registry (RLS: "assigned jobs' asset only"), so on-site they'd be
+  registering blind. Both are duplicate-generators — the same bug class as the prior build's
+  duplicate-site import.
+- **Decision — four safeguards:**
+  1. **Hard DB unique constraint on `assets.label`** — two assets can never share a tracking
+     label. This *catches* a manually-issued duplicate at write time instead of silently
+     creating one.
+  2. **Assisted issuance** — on asset create, the system checks the label isn't taken and
+     **suggests the next available label**. Turns the error-prone manual step into a checked
+     one. Not a rules engine — a uniqueness check + suggestion.
+  3. **Lookup-first register flow** — the tech scans/enters the label (and/or serial); a
+     **narrow scoped lookup** returns exact/near matches ("found: REI-0421 @ FairPrice Bugis —
+     is this it?") vs "new." Lets techs see what exists **without** browsing the full registry,
+     preserving the job-scoped RLS boundary.
+  4. **Pending verification** — a technician's register creates a **provisional** asset an
+     admin confirms and dedups before it's canonical. Mirrors import staging: no source
+     creates a canonical asset without a dedup checkpoint. Field-discovery stays unblocked
+     (the tech isn't stopped mid-job); the admin is the backstop.
+- **Schema note.** "Pending/unverified" is a **separate flag** (e.g. `verified_at` /
+  `is_verified`), **not** an `asset_status` value — verification is orthogonal to the
+  operational status lifecycle (active/in_repair/decommissioned), consistent with keeping
+  profile-completeness out of status too (see `asset-lifecycle-history.md`).
+- **Lands in:** unique constraint + verified flag in Phase 1 schema; assisted issuance + the
+  admin verification queue in the admin cluster; lookup-first + pending register in the
+  technician flow (Phase 2).
+
 ---
 
 ## 3. Recorded, but not forced (lower priority)
@@ -202,6 +235,8 @@ For the future `schema-reviewer` / `migration-writer` pass. These update
       job); generation deferred to Phase 2/3.
 - [ ] **Shared transition module** (legal `job_status` moves + guards), read client + server.
 - [ ] **Client-generated UUIDs on `job_events`** + idempotent server actions (offline safety).
+- [ ] **Unique constraint on `assets.label`** + a **`verified` flag** (not an `asset_status`)
+      for the pending-verification register path; assisted label issuance (next-free suggestion).
 - [ ] (Optional, later) customer sign-off on `service_reports`; jobs-per-tech load view on
       the dispatch board.
 
