@@ -28,6 +28,7 @@ canonical.)
 | `dispatch-create-job-flow.md` | How a job is created and dispatched (the ops_manager path) — from trigger through asset/contract/assign, ending by handing the job to the FSM at Created or Dispatched. |
 | `escalation-notification-flow.md` | The `notification_rules` tiered escalation flow — trigger → condition → wait window → action/channel, and how reassignment re-enters the FSM. |
 | `asset-lifecycle-history.md` | The asset status state machine (active ↔ in_repair → decommissioned) and the generic `asset_history` mechanism — every tracked change (status/location) historized via a DB trigger. |
+| `bulk-import-staging.md` | Historical data migration — CSV → staging → validate/match → admin confirms → commit. Ambiguous matches block commit (the fix for the prior duplicate-site bug); resumable in batches. |
 
 ## Status
 
