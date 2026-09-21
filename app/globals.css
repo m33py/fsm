@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+/* =========================================================================
+   DESIGN TOKENS — single source of truth (docs/design-system.md)
+   Re-theme the whole app by editing values here. Components reference token
+   NAMES, never raw hex. Preview changes on /style-guide.
+   ========================================================================= */
+
+:root {
+  /* neutrals */
+  --bg: #ffffff;
+  --surface: #f8fafc;
+  --surface-muted: #f1f5f9;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  /* brand / action */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-tint: #dbeafe;
+  --primary-foreground: #ffffff;
+  --focus-ring: #3b82f6;
+
+  /* semantic */
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --danger-foreground: #ffffff;
+
+  /* job status — bg / text / dot */
+  --status-created-bg: #f1f5f9;    --status-created-text: #475569;    --status-created-dot: #64748b;
+  --status-dispatched-bg: #dbeafe; --status-dispatched-text: #1d4ed8; --status-dispatched-dot: #2563eb;
+  --status-accepted-bg: #cffafe;   --status-accepted-text: #0e7490;   --status-accepted-dot: #06b6d4;
+  --status-onsite-bg: #ede9fe;     --status-onsite-text: #6d28d9;     --status-onsite-dot: #7c3aed;
+  --status-resolved-bg: #dcfce7;   --status-resolved-text: #15803d;   --status-resolved-dot: #22c55e;
+  --status-escalated-bg: #fee2e2;  --status-escalated-text: #b91c1c;  --status-escalated-dot: #ef4444;
+  --status-closed-bg: #e2e8f0;     --status-closed-text: #334155;     --status-closed-dot: #475569;
+
+  /* asset status */
+  --asset-active-bg: #dcfce7;     --asset-active-text: #15803d;     --asset-active-dot: #22c55e;
+  --asset-repair-bg: #fef3c7;     --asset-repair-text: #b45309;     --asset-repair-dot: #f59e0b;
+  --asset-decom-bg: #e2e8f0;      --asset-decom-text: #475569;      --asset-decom-dot: #64748b;
+  --asset-unverified-bg: #f5f3ff; --asset-unverified-text: #6d28d9; --asset-unverified-dot: #7c3aed;
+
+  /* SLA countdown chip */
+  --sla-ok-bg: #f1f5f9;       --sla-ok-text: #475569;
+  --sla-atrisk-bg: #fef3c7;   --sla-atrisk-text: #b45309;
+  --sla-breached-bg: #fee2e2; --sla-breached-text: #b91c1c;
+
+  /* shadcn base aliases (derived from the neutrals above) */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--bg);
+  --card-foreground: var(--text);
+  --popover: var(--bg);
+  --popover-foreground: var(--text);
+  --secondary: var(--surface-muted);
+  --secondary-foreground: var(--text);
+  --muted: var(--surface-muted);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--surface-muted);
+  --accent-foreground: var(--text);
+  --destructive: var(--danger);
+  --destructive-foreground: var(--danger-foreground);
+  --input: var(--border);
+  --ring: var(--focus-ring);
+}
+
+.dark {
+  --bg: #0b1220;
+  --surface: #111a2e;
+  --surface-muted: #1e293b;
+  --border: #243049;
+  --text: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --primary-tint: #1e3a5f;
+  --primary-foreground: #ffffff;
+  --focus-ring: #60a5fa;
+
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  --status-created-bg: #1e293b;    --status-created-text: #cbd5e1;    --status-created-dot: #94a3b8;
+  --status-dispatched-bg: #172554; --status-dispatched-text: #93c5fd; --status-dispatched-dot: #3b82f6;
+  --status-accepted-bg: #083344;   --status-accepted-text: #67e8f9;   --status-accepted-dot: #22d3ee;
+  --status-onsite-bg: #2e1065;     --status-onsite-text: #c4b5fd;     --status-onsite-dot: #a78bfa;
+  --status-resolved-bg: #052e16;   --status-resolved-text: #86efac;   --status-resolved-dot: #4ade80;
+  --status-escalated-bg: #450a0a;  --status-escalated-text: #fca5a5;  --status-escalated-dot: #f87171;
+  --status-closed-bg: #334155;     --status-closed-text: #cbd5e1;     --status-closed-dot: #94a3b8;
+
+  --asset-active-bg: #052e16;     --asset-active-text: #86efac;     --asset-active-dot: #4ade80;
+  --asset-repair-bg: #451a03;     --asset-repair-text: #fcd34d;     --asset-repair-dot: #f59e0b;
+  --asset-decom-bg: #334155;      --asset-decom-text: #cbd5e1;      --asset-decom-dot: #94a3b8;
+  --asset-unverified-bg: #2e1065; --asset-unverified-text: #c4b5fd; --asset-unverified-dot: #a78bfa;
+
+  --sla-ok-bg: #1e293b;       --sla-ok-text: #cbd5e1;
+  --sla-atrisk-bg: #451a03;   --sla-atrisk-text: #fcd34d;
+  --sla-breached-bg: #450a0a; --sla-breached-text: #fca5a5;
+}
+
+/* Map tokens into Tailwind's theme so utilities (bg-primary, text-muted-foreground, …) resolve. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-tint: var(--primary-tint);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Minimal enter/exit animations for Radix Dialog/Sheet (no external animate dep). */
+@keyframes overlay-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes overlay-out { from { opacity: 1 } to { opacity: 0 } }
+@keyframes sheet-in-right { from { transform: translateX(100%) } to { transform: translateX(0) } }
+@keyframes sheet-out-right { from { transform: translateX(0) } to { transform: translateX(100%) } }
+@keyframes sheet-in-bottom { from { transform: translateY(100%) } to { transform: translateY(0) } }
+@keyframes sheet-out-bottom { from { transform: translateY(0) } to { transform: translateY(100%) } }
+@keyframes dialog-in { from { opacity: 0; transform: translate(-50%, -48%) scale(.97) } to { opacity: 1; transform: translate(-50%, -50%) scale(1) } }
+@keyframes dialog-out { from { opacity: 1; transform: translate(-50%, -50%) scale(1) } to { opacity: 0; transform: translate(-50%, -48%) scale(.97) } }
+
+.anim-overlay[data-state="open"] { animation: overlay-in .18s ease }
+.anim-overlay[data-state="closed"] { animation: overlay-out .18s ease }
+.anim-sheet-right[data-state="open"] { animation: sheet-in-right .22s cubic-bezier(.32,.72,0,1) }
+.anim-sheet-right[data-state="closed"] { animation: sheet-out-right .2s ease-in }
+.anim-sheet-bottom[data-state="open"] { animation: sheet-in-bottom .24s cubic-bezier(.32,.72,0,1) }
+.anim-sheet-bottom[data-state="closed"] { animation: sheet-out-bottom .2s ease-in }
+.anim-dialog[data-state="open"] { animation: dialog-in .18s ease }
+.anim-dialog[data-state="closed"] { animation: dialog-out .16s ease-in }
