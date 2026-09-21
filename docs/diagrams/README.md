@@ -27,6 +27,7 @@ canonical.)
 | `job-lifecycle-fsm.md` | The core Job finite state machine — states, transitions, who triggers each, which timestamp is captured, resolution outcomes. |
 | `dispatch-create-job-flow.md` | How a job is created and dispatched (the ops_manager path) — from trigger through asset/contract/assign, ending by handing the job to the FSM at Created or Dispatched. |
 | `escalation-notification-flow.md` | The `notification_rules` tiered escalation flow — trigger → condition → wait window → action/channel, and how reassignment re-enters the FSM. |
+| `asset-lifecycle-history.md` | The asset status state machine (active ↔ in_repair → decommissioned) and the generic `asset_history` mechanism — every tracked change (status/location) historized via a DB trigger. |
 
 ## Status
 
