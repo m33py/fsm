@@ -4,6 +4,7 @@ import { MapPin, User, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { JobTypeChip } from "@/components/shared/JobTypeChip";
 import { SlaChip } from "@/components/shared/SlaChip";
+import { StatusBadge } from "@/components/shared/StatusBadge";
 import { cn } from "@/lib/utils";
 import { CRITICALITY, type Criticality, type Job } from "@/lib/mock/dispatch";
 
@@ -17,9 +18,12 @@ const CRIT_ACCENT: Record<Criticality, string> = {
 export function JobCard({
   job,
   onAssign,
+  showStatus = false,
 }: {
   job: Job;
   onAssign?: (job: Job) => void;
+  /** Show the status badge on the card. On for the mobile list (no lanes); off in lanes. */
+  showStatus?: boolean;
 }) {
   return (
     <article
@@ -32,11 +36,7 @@ export function JobCard({
             <span className="font-mono text-xs text-text-muted">{job.id}</span>
             <JobTypeChip type={job.type} />
           </div>
-          {job.slaMinutesRemaining !== undefined ? (
-            <SlaChip minutesRemaining={job.slaMinutesRemaining} />
-          ) : (
-            <span className="text-[11px] text-text-muted">No SLA</span>
-          )}
+          {showStatus && <StatusBadge status={job.status} />}
         </div>
 
         <div>
@@ -47,18 +47,25 @@ export function JobCard({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs">
-          <span className="font-mono text-text-secondary">{job.assetLabel}</span>
-          <span
-            className={cn(
-              "font-medium",
-              job.criticality === "critical" && "text-danger",
-              job.criticality === "high" && "text-warning",
-              job.criticality === "standard" && "text-text-muted"
-            )}
-          >
-            {CRITICALITY[job.criticality]}
-          </span>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="font-mono text-text-secondary">{job.assetLabel}</span>
+            <span
+              className={cn(
+                "font-medium",
+                job.criticality === "critical" && "text-danger",
+                job.criticality === "high" && "text-warning",
+                job.criticality === "standard" && "text-text-muted"
+              )}
+            >
+              {CRITICALITY[job.criticality]}
+            </span>
+          </div>
+          {job.slaMinutesRemaining !== undefined ? (
+            <SlaChip minutesRemaining={job.slaMinutesRemaining} />
+          ) : (
+            <span className="text-[11px] text-text-muted">No SLA</span>
+          )}
         </div>
 
         <div className="flex items-center justify-between gap-2 pt-0.5">
