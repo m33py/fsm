@@ -16,7 +16,7 @@ flowchart TD
     N[OM opens New Job slide-over] --> JT[Pick job_type<br/>alert / scheduled / ad_hoc]
     JT --> AS{Asset already<br/>in system?}
 
-    AS -- no --> MIN[Register minimal asset<br/>label · customer · site · segment<br/>admin completes profile later]
+    AS -- no --> MIN[Register minimal asset<br/>label · customer · site<br/>admin completes profile later]
     AS -- yes --> SEL[Select asset · searchable]
     MIN --> SEL
 

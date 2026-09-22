@@ -24,6 +24,7 @@ canonical.)
 
 | File | What it defines |
 |---|---|
+| `data-model-er.md` | Entity relationships — customer hierarchy (parent → sub-brand), sites, assets, contracts (coverage = explicit asset list), jobs, history. Matches `technical-design.md §2`. |
 | `job-lifecycle-fsm.md` | The core Job finite state machine — states, transitions, who triggers each, which timestamp is captured, resolution outcomes. |
 | `dispatch-create-job-flow.md` | How a job is created and dispatched (the ops_manager path) — from trigger through asset/contract/assign, ending by handing the job to the FSM at Created or Dispatched. |
 | `escalation-notification-flow.md` | The `notification_rules` tiered escalation flow — trigger → condition → wait window → action/channel, and how reassignment re-enters the FSM. |
@@ -32,8 +33,9 @@ canonical.)
 
 ## Status
 
-These reflect the four decisions recorded in `docs/design-review.md` (dual response clock,
-`resolution_outcome`, Accepted/En-route substate, one shared transition rulebook). They are
-**design source of truth**; `docs/technical-design.md` is updated to match when Phase-1 build
-begins — until then, where the two differ, `design-review.md` + these diagrams are the newer
-intent.
+These reflect the decisions in `docs/design-review.md` (dual response clock, `resolution_outcome`,
+Accepted/En-route substate, one shared transition rulebook, and the deferred-segment decision) and
+the data model agreed in `docs/technical-design.md §2` (customer parent → sub-brand hierarchy,
+contract coverage as an explicit asset list, warranty split, snapshot job FKs). Diagrams and
+`technical-design.md` are now aligned; when the logic changes, the diagram changes here in the
+same PR.
