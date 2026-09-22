@@ -281,10 +281,18 @@ export function DispatchBoard() {
             {/* Mobile stacked list */}
             <div className="flex flex-col md:hidden">
               {rows.map((job) => (
-                <button
+                <div
                   key={job.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setDetailJob(job)}
-                  className="flex flex-col gap-3 border-b border-border p-4 text-left last:border-b-0 active:bg-surface-muted/60"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setDetailJob(job);
+                    }
+                  }}
+                  className="flex cursor-pointer flex-col gap-3 border-b border-border p-4 text-left outline-none last:border-b-0 focus-visible:bg-surface-muted/60 active:bg-surface-muted/60"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2">
@@ -314,7 +322,7 @@ export function DispatchBoard() {
                       <span className="font-mono text-[10px] text-text-muted">Age {job.age}</span>
                     </div>
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           </>
