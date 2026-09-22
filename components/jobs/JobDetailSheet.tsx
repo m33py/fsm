@@ -1,7 +1,7 @@
 "use client";
 
-import { AlertTriangle, Users, MapPin } from "lucide-react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { AlertTriangle, Users, MapPin, X } from "lucide-react";
+import { Sheet, SheetContent, SheetClose } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -31,15 +31,21 @@ export function JobDetailSheet({
       <SheetContent side="right" className="sm:max-w-md">
         {job && (
           <>
-            <div className="flex items-start justify-between gap-3 border-b border-border p-4">
-              <div>
+            <div className="border-b border-border p-4">
+              <div className="flex items-center justify-between gap-3">
                 <div className="font-mono text-base font-semibold text-text">{job.id}</div>
-                <div className="mt-0.5 flex items-center gap-1 text-sm text-text-secondary">
-                  <MapPin className="size-3.5" />
-                  {job.customer} — {job.site}
+                <div className="flex items-center gap-2">
+                  <StatusBadge status={job.status} />
+                  <SheetClose className="-mr-1 rounded-md p-1.5 text-text-muted outline-none hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-ring">
+                    <X className="size-5" />
+                    <span className="sr-only">Close</span>
+                  </SheetClose>
                 </div>
               </div>
-              <StatusBadge status={job.status} />
+              <div className="mt-1 flex items-center gap-1 text-sm text-text-secondary">
+                <MapPin className="size-3.5" />
+                {job.customer} — {job.site}
+              </div>
             </div>
 
             <div className="flex flex-col gap-6 p-4">
