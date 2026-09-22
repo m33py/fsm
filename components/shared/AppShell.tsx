@@ -23,7 +23,7 @@ type NavItem = { label: string; icon: LucideIcon; roles: Role[]; href: string };
 
 const NAV: NavItem[] = [
   { label: "Dispatch", icon: LayoutDashboard, roles: ["admin", "ops_manager"], href: "/dispatch" },
-  { label: "Jobs", icon: ClipboardList, roles: ["admin", "ops_manager"], href: "#" },
+  { label: "Jobs", icon: ClipboardList, roles: ["admin", "ops_manager"], href: "/jobs" },
   { label: "My Jobs", icon: ClipboardCheck, roles: ["technician"], href: "/my-jobs" },
   { label: "Assets", icon: Package, roles: ["admin", "ops_manager"], href: "/assets" },
   { label: "Register Asset", icon: PlusCircle, roles: ["technician"], href: "/register-asset" },

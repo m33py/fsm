@@ -67,7 +67,20 @@ export function ContractDetailSheet({
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg border border-border p-3">
                   <div className="text-[11px] text-text-muted">Coverage</div>
-                  <div className="mt-0.5 text-sm font-medium text-text">{contract.coverage}</div>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {contract.coverage.length === 0 ? (
+                      <span className="text-sm text-text-muted">—</span>
+                    ) : (
+                      contract.coverage.map((c) => (
+                        <span
+                          key={c}
+                          className="rounded-md bg-surface-muted px-1.5 py-0.5 text-[11px] font-medium text-text-secondary"
+                        >
+                          {c}
+                        </span>
+                      ))
+                    )}
+                  </div>
                 </div>
                 <div className="rounded-lg border border-border p-3">
                   <div className="text-[11px] text-text-muted">Assets covered</div>

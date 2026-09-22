@@ -123,21 +123,27 @@ export function JobDetailSheet({
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  className="flex-1 border-[var(--warning)] text-warning hover:bg-[var(--sla-atrisk-bg)]"
-                  onClick={() => onEscalate?.(job)}
-                >
-                  <AlertTriangle className="size-4" />
-                  Escalate
-                </Button>
-                <Button variant="outline" className="flex-1" onClick={() => onReassign?.(job)}>
-                  <Users className="size-4" />
-                  Reassign
-                </Button>
-              </div>
+              {/* Actions — only for live jobs (hidden in read-only history / terminal states) */}
+              {(onEscalate || onReassign) && !["resolved", "closed"].includes(job.status) && (
+                <div className="flex items-center gap-2">
+                  {onEscalate && (
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-[var(--warning)] text-warning hover:bg-[var(--sla-atrisk-bg)]"
+                      onClick={() => onEscalate(job)}
+                    >
+                      <AlertTriangle className="size-4" />
+                      Escalate
+                    </Button>
+                  )}
+                  {onReassign && (
+                    <Button variant="outline" className="flex-1" onClick={() => onReassign(job)}>
+                      <Users className="size-4" />
+                      Reassign
+                    </Button>
+                  )}
+                </div>
+              )}
 
               {/* Assigned tech */}
               <div className="rounded-lg border border-border p-4">
