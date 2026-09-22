@@ -33,7 +33,6 @@ export function ContractDetailSheet({
                   <Building2 className="size-3.5" />
                   {contract.customer}
                 </span>
-                <span className="text-xs text-text-muted">{contract.segment}</span>
               </div>
             </div>
 

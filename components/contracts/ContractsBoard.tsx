@@ -40,7 +40,7 @@ export function ContractsBoard() {
     return CONTRACTS.filter((c) => {
       if (status !== "all" && c.status !== status) return false;
       if (!q) return true;
-      return [c.name, c.customer, c.segment, c.coverage].join(" ").toLowerCase().includes(q);
+      return [c.name, c.customer, c.coverage].join(" ").toLowerCase().includes(q);
     });
   }, [query, status]);
 

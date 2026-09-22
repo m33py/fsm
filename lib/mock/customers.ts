@@ -4,7 +4,6 @@
  * Shapes mirror the intended schema.
  */
 
-export type CustomerSegment = "FROST" | "Legacy / Shopfit" | "Enterprise / MNC";
 export type CustomerStatus = "active" | "prospect" | "inactive";
 
 export const CUSTOMER_STATUS: Record<CustomerStatus, { label: string; bg: string; text: string; dot: string }> = {
@@ -20,7 +19,6 @@ export type Contact = { name: string; role: string; phone: string; email: string
 export type Customer = {
   id: string;
   name: string;
-  segment: CustomerSegment;
   status: CustomerStatus;
   sites: CustomerSite[];
   assets: number;
@@ -32,7 +30,6 @@ export const CUSTOMERS: Customer[] = [
   {
     id: "c1",
     name: "FairPrice",
-    segment: "FROST",
     status: "active",
     sites: [
       { name: "Bugis Junction", assets: 6 },
@@ -46,7 +43,6 @@ export const CUSTOMERS: Customer[] = [
   {
     id: "c2",
     name: "Cold Storage",
-    segment: "FROST",
     status: "active",
     sites: [
       { name: "Great World", assets: 5 },
@@ -59,7 +55,6 @@ export const CUSTOMERS: Customer[] = [
   {
     id: "c3",
     name: "Sheng Siong",
-    segment: "Legacy / Shopfit",
     status: "active",
     sites: [{ name: "Tampines Ave 4", assets: 3 }],
     assets: 3,
@@ -72,7 +67,6 @@ export const CUSTOMERS: Customer[] = [
   {
     id: "c4",
     name: "Giant",
-    segment: "Legacy / Shopfit",
     status: "active",
     sites: [{ name: "IMM Jurong", assets: 4 }],
     assets: 4,
@@ -82,7 +76,6 @@ export const CUSTOMERS: Customer[] = [
   {
     id: "c5",
     name: "Marketplace",
-    segment: "Enterprise / MNC",
     status: "active",
     sites: [{ name: "Paragon", assets: 5 }],
     assets: 5,
@@ -92,7 +85,6 @@ export const CUSTOMERS: Customer[] = [
   {
     id: "c6",
     name: "7-Eleven",
-    segment: "Legacy / Shopfit",
     status: "inactive",
     sites: [{ name: "Clarke Quay", assets: 0 }],
     assets: 0,
@@ -102,7 +94,6 @@ export const CUSTOMERS: Customer[] = [
   {
     id: "c7",
     name: "NTUC Foodfare",
-    segment: "Enterprise / MNC",
     status: "prospect",
     sites: [],
     assets: 0,
@@ -111,4 +102,3 @@ export const CUSTOMERS: Customer[] = [
   },
 ];
 
-export const CUSTOMER_SEGMENTS: CustomerSegment[] = ["FROST", "Legacy / Shopfit", "Enterprise / MNC"];

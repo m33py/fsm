@@ -42,7 +42,7 @@ export function AssetsBoard() {
       if (statusFilter !== "all" && a.status !== statusFilter) return false;
       if (unverifiedOnly && a.verified) return false;
       if (!q) return true;
-      return [a.label, a.desc, a.customer, a.site, a.segment]
+      return [a.label, a.desc, a.customer, a.site]
         .join(" ")
         .toLowerCase()
         .includes(q);
@@ -88,7 +88,7 @@ export function AssetsBoard() {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search label, type, customer, site or segment…"
+              placeholder="Search label, type, customer or site…"
               className="pl-9"
             />
           </div>
@@ -134,7 +134,6 @@ export function AssetsBoard() {
                     <TableHead>Asset</TableHead>
                     <TableHead>Customer</TableHead>
                     <TableHead>Site</TableHead>
-                    <TableHead>Segment</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Last service</TableHead>
                   </TableRow>
@@ -157,7 +156,6 @@ export function AssetsBoard() {
                           {a.site}
                         </span>
                       </TableCell>
-                      <TableCell className="text-xs text-text-secondary">{a.segment}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap items-center gap-1">
                           <StatusBadge kind="asset" status={a.status} />
@@ -201,7 +199,6 @@ export function AssetsBoard() {
                     <MapPin className="size-3.5 text-text-muted" />
                     {a.customer} · {a.site}
                   </div>
-                  <div className="text-xs text-text-muted">{a.segment}</div>
                 </div>
               ))}
             </div>

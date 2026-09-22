@@ -19,7 +19,6 @@ export type Contract = {
   id: string;
   name: string;
   customer: string;
-  segment: string;
   status: ContractStatus;
   coverage: string; // "Preventive + Reactive", "Reactive only", …
   startDate: string;
@@ -36,7 +35,6 @@ export const CONTRACTS: Contract[] = [
     id: "ct1",
     name: "FairPrice FROST — 2025",
     customer: "FairPrice",
-    segment: "FROST",
     status: "active",
     coverage: "Preventive + Reactive",
     startDate: "2025-01-01",
@@ -50,7 +48,6 @@ export const CONTRACTS: Contract[] = [
     id: "ct2",
     name: "Cold Storage PM+Reactive",
     customer: "Cold Storage",
-    segment: "FROST",
     status: "active",
     coverage: "Preventive + Reactive",
     startDate: "2024-07-01",
@@ -64,7 +61,6 @@ export const CONTRACTS: Contract[] = [
     id: "ct3",
     name: "Sheng Siong Reactive",
     customer: "Sheng Siong",
-    segment: "Legacy / Shopfit",
     status: "expiring_soon",
     coverage: "Reactive only",
     startDate: "2024-11-01",
@@ -78,7 +74,6 @@ export const CONTRACTS: Contract[] = [
     id: "ct4",
     name: "Giant Legacy",
     customer: "Giant",
-    segment: "Legacy / Shopfit",
     status: "active",
     coverage: "Reactive only",
     startDate: "2025-03-01",
@@ -92,7 +87,6 @@ export const CONTRACTS: Contract[] = [
     id: "ct5",
     name: "Marketplace MNC SLA",
     customer: "Marketplace",
-    segment: "Enterprise / MNC",
     status: "active",
     coverage: "Preventive + Reactive + Reporting",
     startDate: "2025-01-15",
@@ -106,7 +100,6 @@ export const CONTRACTS: Contract[] = [
     id: "ct6",
     name: "Swensen's Ad-hoc (lapsed)",
     customer: "Swensen's",
-    segment: "Legacy / Shopfit",
     status: "expired",
     coverage: "Reactive only",
     startDate: "2023-06-01",

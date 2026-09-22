@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Search, MapPin, Package, FileText, Building2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -17,34 +16,22 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { CustomerStatusBadge } from "@/components/customers/CustomerStatusBadge";
 import { CustomerDetailSheet } from "@/components/customers/CustomerDetailSheet";
-import {
-  CUSTOMERS,
-  CUSTOMER_SEGMENTS,
-  type Customer,
-  type CustomerSegment,
-} from "@/lib/mock/customers";
-
-type SegFilter = CustomerSegment | "all";
+import { CUSTOMERS, type Customer } from "@/lib/mock/customers";
 
 export function CustomersBoard() {
   const [query, setQuery] = React.useState("");
-  const [seg, setSeg] = React.useState<SegFilter>("all");
   const [detail, setDetail] = React.useState<Customer | null>(null);
 
   const rows = React.useMemo(() => {
     const q = query.trim().toLowerCase();
     return CUSTOMERS.filter((c) => {
-      if (seg !== "all" && c.segment !== seg) return false;
       if (!q) return true;
-      return [c.name, c.segment, c.contact.name, ...c.sites.map((s) => s.name)]
+      return [c.name, c.contact.name, ...c.sites.map((s) => s.name)]
         .join(" ")
         .toLowerCase()
         .includes(q);
     });
-  }, [query, seg]);
-
-  const segCount = (s: SegFilter) =>
-    s === "all" ? CUSTOMERS.length : CUSTOMERS.filter((c) => c.segment === s).length;
+  }, [query]);
 
   return (
     <div className="mx-auto flex h-full max-w-[1400px] flex-col gap-4 p-4 md:p-6">
@@ -54,28 +41,14 @@ export function CustomersBoard() {
       />
 
       {/* Toolbar */}
-      <div className="flex flex-col gap-3">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search customer, contact or site…"
-            className="pl-9"
-          />
-        </div>
-        <Tabs value={seg} onValueChange={(v) => setSeg(v as SegFilter)}>
-          <TabsList>
-            <TabsTrigger value="all">
-              All <span className="text-text-muted">{segCount("all")}</span>
-            </TabsTrigger>
-            {CUSTOMER_SEGMENTS.map((s) => (
-              <TabsTrigger key={s} value={s}>
-                {s} <span className="text-text-muted">{segCount(s)}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search customer, contact or site…"
+          className="pl-9"
+        />
       </div>
 
       <Card className="overflow-hidden">
@@ -88,7 +61,7 @@ export function CustomersBoard() {
             <EmptyState
               icon={<Building2 className="size-6" />}
               title="No customers match"
-              description="Adjust the search or segment filter."
+              description="Adjust the search."
             />
           </div>
         ) : (
@@ -99,7 +72,6 @@ export function CustomersBoard() {
                 <TableHeader>
                   <TableRow className="bg-surface-muted/60">
                     <TableHead>Customer</TableHead>
-                    <TableHead>Segment</TableHead>
                     <TableHead>Sites</TableHead>
                     <TableHead>Assets</TableHead>
                     <TableHead>Contracts</TableHead>
@@ -117,7 +89,6 @@ export function CustomersBoard() {
                         <div className="text-sm font-medium text-text">{c.name}</div>
                         <div className="text-xs text-text-muted">{c.contact.name}</div>
                       </TableCell>
-                      <TableCell className="text-xs text-text-secondary">{c.segment}</TableCell>
                       <TableCell className="text-sm text-text-secondary">{c.sites.length}</TableCell>
                       <TableCell className="text-sm text-text-secondary">{c.assets}</TableCell>
                       <TableCell className="text-sm text-text-secondary">{c.contracts.length}</TableCell>
@@ -153,7 +124,6 @@ export function CustomersBoard() {
                     </div>
                     <CustomerStatusBadge status={c.status} />
                   </div>
-                  <div className="text-xs text-text-secondary">{c.segment}</div>
                   <div className="flex items-center gap-4 text-xs text-text-muted">
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="size-3.5" />

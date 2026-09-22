@@ -29,7 +29,6 @@ export function CustomerDetailSheet({
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <CustomerStatusBadge status={customer.status} />
-                <span className="text-xs text-text-secondary">{customer.segment}</span>
               </div>
             </div>
 
