@@ -27,7 +27,7 @@ stateDiagram-v2
 ```
 
 - **Registration can be minimal or full.** A technician can field-register a minimal asset
-  on-site (label · customer · site · segment); admin completes the profile later (PRD §5.1).
+  on-site (label · customer · site); admin completes the profile later (PRD §5.1).
   **Profile completeness is orthogonal to status** — a minimally-registered asset is still
   `active`, just incomplete. Completeness is not a status value.
 - `asset_statuses` is a **lookup table**, not an enum — adding a status is a data insert.
