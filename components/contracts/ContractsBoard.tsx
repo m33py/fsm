@@ -1,10 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Search, FileText, Building2 } from "lucide-react";
+import { Search, FileText, Building2, Plus } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { NewContractForm } from "@/components/contracts/NewContractForm";
 import {
   Table,
   TableBody,
@@ -31,27 +35,35 @@ const TABS: { value: StatusFilter; label: string }[] = [
 ];
 
 export function ContractsBoard() {
+  const [contracts, setContracts] = React.useState<Contract[]>(CONTRACTS);
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState<StatusFilter>("all");
   const [detail, setDetail] = React.useState<Contract | null>(null);
+  const [newOpen, setNewOpen] = React.useState(false);
 
   const rows = React.useMemo(() => {
     const q = query.trim().toLowerCase();
-    return CONTRACTS.filter((c) => {
+    return contracts.filter((c) => {
       if (status !== "all" && c.status !== status) return false;
       if (!q) return true;
       return [c.name, c.customer, c.coverage].join(" ").toLowerCase().includes(q);
     });
-  }, [query, status]);
+  }, [contracts, query, status]);
 
   const count = (s: StatusFilter) =>
-    s === "all" ? CONTRACTS.length : CONTRACTS.filter((c) => c.status === s).length;
+    s === "all" ? contracts.length : contracts.filter((c) => c.status === s).length;
 
   return (
     <div className="mx-auto flex h-full max-w-[1400px] flex-col gap-4 p-4 md:p-6">
       <PageHeader
         title="Contracts"
         description="Service contracts and their SLA parameters — response windows, coverage, terms."
+        action={
+          <Button onClick={() => setNewOpen(true)}>
+            <Plus className="size-4" />
+            New Contract
+          </Button>
+        }
       />
 
       <div className="flex flex-col gap-3">
@@ -165,6 +177,19 @@ export function ContractsBoard() {
       </Card>
 
       <ContractDetailSheet contract={detail} onOpenChange={(o) => !o && setDetail(null)} />
+
+      <Sheet open={newOpen} onOpenChange={setNewOpen}>
+        <SheetContent side="right" title="New Contract" description="Add a service contract." className="sm:max-w-md">
+          <NewContractForm
+            onCancel={() => setNewOpen(false)}
+            onCreate={(c) => {
+              setContracts((prev) => [c, ...prev]);
+              setNewOpen(false);
+              toast.success(`${c.name} added`);
+            }}
+          />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

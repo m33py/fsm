@@ -1,12 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { Search, MapPin, Package, ShieldAlert } from "lucide-react";
+import { Search, MapPin, Package, ShieldAlert, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { NewAssetForm } from "@/components/assets/NewAssetForm";
 import {
   Table,
   TableBody,
@@ -35,6 +38,7 @@ export function AssetsBoard() {
   const [statusFilter, setStatusFilter] = React.useState<StatusFilter>("all");
   const [unverifiedOnly, setUnverifiedOnly] = React.useState(false);
   const [detail, setDetail] = React.useState<AssetRecord | null>(null);
+  const [newOpen, setNewOpen] = React.useState(false);
 
   const rows = React.useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -78,6 +82,12 @@ export function AssetsBoard() {
       <PageHeader
         title="Assets"
         description="The refrigeration asset register — status, location, contracts, and full history."
+        action={
+          <Button onClick={() => setNewOpen(true)}>
+            <Plus className="size-4" />
+            New Asset
+          </Button>
+        }
       />
 
       {/* Toolbar */}
@@ -207,6 +217,19 @@ export function AssetsBoard() {
       </Card>
 
       <AssetDetailSheet asset={detail} onOpenChange={(o) => !o && setDetail(null)} onVerify={verify} />
+
+      <Sheet open={newOpen} onOpenChange={setNewOpen}>
+        <SheetContent side="right" title="New Asset" description="Add an asset to the register." className="sm:max-w-md">
+          <NewAssetForm
+            onCancel={() => setNewOpen(false)}
+            onCreate={(a) => {
+              setAssets((prev) => [a, ...prev]);
+              setNewOpen(false);
+              toast.success(`${a.label} added`);
+            }}
+          />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

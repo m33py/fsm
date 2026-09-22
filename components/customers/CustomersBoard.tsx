@@ -1,9 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Search, MapPin, Package, FileText, Building2 } from "lucide-react";
+import { Search, MapPin, Package, FileText, Building2, Plus } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { NewCustomerForm } from "@/components/customers/NewCustomerForm";
 import {
   Table,
   TableBody,
@@ -19,25 +23,33 @@ import { CustomerDetailSheet } from "@/components/customers/CustomerDetailSheet"
 import { CUSTOMERS, type Customer } from "@/lib/mock/customers";
 
 export function CustomersBoard() {
+  const [customers, setCustomers] = React.useState<Customer[]>(CUSTOMERS);
   const [query, setQuery] = React.useState("");
   const [detail, setDetail] = React.useState<Customer | null>(null);
+  const [newOpen, setNewOpen] = React.useState(false);
 
   const rows = React.useMemo(() => {
     const q = query.trim().toLowerCase();
-    return CUSTOMERS.filter((c) => {
+    return customers.filter((c) => {
       if (!q) return true;
       return [c.name, c.contact.name, ...c.sites.map((s) => s.name)]
         .join(" ")
         .toLowerCase()
         .includes(q);
     });
-  }, [query]);
+  }, [customers, query]);
 
   return (
     <div className="mx-auto flex h-full max-w-[1400px] flex-col gap-4 p-4 md:p-6">
       <PageHeader
         title="Customers"
         description="Customer accounts — sites, assets, contracts, and contacts."
+        action={
+          <Button onClick={() => setNewOpen(true)}>
+            <Plus className="size-4" />
+            New Customer
+          </Button>
+        }
       />
 
       {/* Toolbar */}
@@ -146,6 +158,19 @@ export function CustomersBoard() {
       </Card>
 
       <CustomerDetailSheet customer={detail} onOpenChange={(o) => !o && setDetail(null)} />
+
+      <Sheet open={newOpen} onOpenChange={setNewOpen}>
+        <SheetContent side="right" title="New Customer" description="Add a customer account." className="sm:max-w-md">
+          <NewCustomerForm
+            onCancel={() => setNewOpen(false)}
+            onCreate={(c) => {
+              setCustomers((prev) => [c, ...prev]);
+              setNewOpen(false);
+              toast.success(`${c.name} added`);
+            }}
+          />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
