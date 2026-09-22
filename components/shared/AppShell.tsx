@@ -24,7 +24,7 @@ const NAV: NavItem[] = [
   { label: "Dispatch", icon: LayoutDashboard, roles: ["admin", "ops_manager"], href: "/dispatch" },
   { label: "Jobs", icon: ClipboardList, roles: ["admin", "ops_manager"], href: "#" },
   { label: "My Jobs", icon: ClipboardCheck, roles: ["technician"], href: "/my-jobs" },
-  { label: "Assets", icon: Package, roles: ["admin", "ops_manager"], href: "#" },
+  { label: "Assets", icon: Package, roles: ["admin", "ops_manager"], href: "/assets" },
   { label: "Register Asset", icon: PlusCircle, roles: ["technician"], href: "/register-asset" },
   { label: "Customers", icon: Building2, roles: ["admin"], href: "#" },
   { label: "Contracts", icon: FileText, roles: ["admin"], href: "#" },
