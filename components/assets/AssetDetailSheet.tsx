@@ -1,7 +1,7 @@
 "use client";
 
-import { MapPin, ShieldCheck, FileText, Wrench, History } from "lucide-react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { MapPin, ShieldCheck, FileText, Wrench, History, X } from "lucide-react";
+import { Sheet, SheetContent, SheetClose } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -26,12 +26,16 @@ export function AssetDetailSheet({
       <SheetContent side="right" className="sm:max-w-md">
         {asset && (
           <>
-            <div className="flex items-start justify-between gap-3 border-b border-border p-4">
-              <div>
+            <div className="border-b border-border p-4">
+              <div className="flex items-center justify-between gap-3">
                 <div className="font-mono text-base font-semibold text-text">{asset.label}</div>
-                <div className="mt-0.5 text-sm text-text-secondary">{asset.desc}</div>
+                <SheetClose className="-mr-1 rounded-md p-1.5 text-text-muted outline-none hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-ring">
+                  <X className="size-5" />
+                  <span className="sr-only">Close</span>
+                </SheetClose>
               </div>
-              <div className="flex flex-col items-end gap-1">
+              <div className="mt-0.5 text-sm text-text-secondary">{asset.desc}</div>
+              <div className="mt-2 flex flex-wrap items-center gap-1">
                 <StatusBadge kind="asset" status={asset.status} />
                 {!asset.verified && <StatusBadge kind="asset" status="unverified" />}
               </div>
