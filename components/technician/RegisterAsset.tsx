@@ -13,11 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  REGISTER_CUSTOMERS,
-  REGISTER_SEGMENTS,
-  REGISTER_SITES,
-} from "@/lib/mock/technician";
+import { REGISTER_CUSTOMERS, REGISTER_SITES } from "@/lib/mock/technician";
 
 /**
  * Quick register — field discovery for a new asset (CLAUDE.md technician flow).
@@ -28,16 +24,14 @@ export function RegisterAsset() {
   const [label, setLabel] = React.useState("");
   const [customer, setCustomer] = React.useState("");
   const [site, setSite] = React.useState("");
-  const [segment, setSegment] = React.useState("");
 
-  const canSubmit = label.trim() && customer && site && segment;
+  const canSubmit = label.trim() && customer && site;
 
   function submit() {
     toast.success(`${label.trim()} registered — pending admin verification`);
     setLabel("");
     setCustomer("");
     setSite("");
-    setSegment("");
   }
 
   return (
@@ -92,21 +86,6 @@ export function RegisterAsset() {
             </Select>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label>Segment</Label>
-            <Select value={segment} onValueChange={setSegment}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select segment" />
-              </SelectTrigger>
-              <SelectContent>
-                {REGISTER_SEGMENTS.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
 
           <Button className="mt-2 h-12" disabled={!canSubmit} onClick={submit}>
             Register asset

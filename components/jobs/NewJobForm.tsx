@@ -87,7 +87,7 @@ export function NewJobForm({
       type,
       criticality,
       assetLabel: asset.label,
-      assetDesc: asset.segment,
+      assetDesc: asset.desc,
       customer: asset.customer,
       site: asset.site,
       assignedTo: dispatch ? tech?.name : undefined,
@@ -151,7 +151,7 @@ export function NewJobForm({
             <div>
               <div className="font-medium text-text">{asset.customer}</div>
               <div className="text-text-secondary">
-                {asset.site} · {asset.segment}
+                {asset.site} · {asset.desc}
               </div>
             </div>
           </div>

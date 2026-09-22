@@ -48,8 +48,6 @@ export function AssetDetailSheet({
                 <Separator className="my-2.5" />
                 <Row label="Site" value={asset.site} icon={<MapPin className="size-3.5" />} />
                 <Separator className="my-2.5" />
-                <Row label="Segment" value={asset.segment} />
-                <Separator className="my-2.5" />
                 <Row
                   label="Contracts"
                   value={asset.contracts > 0 ? `${asset.contracts} linked` : "None"}

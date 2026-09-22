@@ -35,17 +35,17 @@ export const TECHNICIANS: Technician[] = [
 export type AssetOption = {
   id: string;
   label: string; // REI asset tag (mono in UI)
+  desc: string; // asset type, e.g. "Display freezer"
   customer: string;
   site: string;
-  segment: string;
 };
 
 export const ASSETS: AssetOption[] = [
-  { id: "a1", label: "REI-0417", customer: "FairPrice", site: "Bugis Junction", segment: "FROST" },
-  { id: "a2", label: "REI-0312", customer: "Cold Storage", site: "Great World", segment: "FROST" },
-  { id: "a3", label: "REI-0588", customer: "Sheng Siong", site: "Tampines Ave 4", segment: "Legacy" },
-  { id: "a4", label: "REI-0129", customer: "Giant", site: "IMM Jurong", segment: "Legacy" },
-  { id: "a5", label: "REI-0602", customer: "Marketplace", site: "Paragon", segment: "Enterprise" },
+  { id: "a1", label: "REI-0417", desc: "Display freezer", customer: "FairPrice", site: "Bugis Junction" },
+  { id: "a2", label: "REI-0312", desc: "2-door chiller", customer: "Cold Storage", site: "Great World" },
+  { id: "a3", label: "REI-0588", desc: "Door seal (chiller)", customer: "Sheng Siong", site: "Tampines Ave 4" },
+  { id: "a4", label: "REI-0129", desc: "Blast chiller", customer: "Giant", site: "IMM Jurong" },
+  { id: "a5", label: "REI-0602", desc: "Walk-in freezer", customer: "Marketplace", site: "Paragon" },
 ];
 
 export type Contract = {

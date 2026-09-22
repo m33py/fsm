@@ -242,3 +242,14 @@ For the future `schema-reviewer` / `migration-writer` pass. These update
 
 None of the above is a new rules engine; `notification_rules` remains the single sanctioned
 exception per `technical-design.md` §2 and `scope-guard`.
+
+---
+
+## Open decision — customer segment (deferred)
+
+`segment` (FROST / Legacy-Shopfit / Enterprise-MNC) is **removed from the UI for now**,
+pending business alignment. FROST turns out to be a **client / parent company** (brands
+like Häagen-Dazs, Laughing Cow, Chobani under it), not a clean classification — so the real
+customer hierarchy (parent company → brand → site) needs Christine + the business owner to
+define before we model it. Segment stays a lookup we add back once that's settled (it was
+always specified as a lookup row, not hardcoded — so this is a data add, not a rebuild).

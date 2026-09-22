@@ -30,7 +30,6 @@ export type AssetRecord = {
   id: string;
   label: string; // REI-XXXX, mono
   desc: string; // "2-door chiller"
-  segment: string;
   customer: string;
   site: string;
   status: AssetLifecycle;
@@ -45,7 +44,6 @@ export const ASSET_RECORDS: AssetRecord[] = [
     id: "as1",
     label: "REI-0417",
     desc: "Display freezer",
-    segment: "FROST",
     customer: "FairPrice",
     site: "Bugis Junction",
     status: "active",
@@ -62,7 +60,6 @@ export const ASSET_RECORDS: AssetRecord[] = [
     id: "as2",
     label: "REI-0312",
     desc: "2-door chiller",
-    segment: "FROST",
     customer: "Cold Storage",
     site: "Great World",
     status: "in_repair",
@@ -79,7 +76,6 @@ export const ASSET_RECORDS: AssetRecord[] = [
     id: "as3",
     label: "REI-0588",
     desc: "Door seal (chiller)",
-    segment: "Legacy / Shopfit",
     customer: "Sheng Siong",
     site: "Tampines Ave 4",
     status: "active",
@@ -94,7 +90,6 @@ export const ASSET_RECORDS: AssetRecord[] = [
     id: "as4",
     label: "REI-0129",
     desc: "Blast chiller",
-    segment: "Legacy / Shopfit",
     customer: "Giant",
     site: "IMM Jurong",
     status: "active",
@@ -110,7 +105,6 @@ export const ASSET_RECORDS: AssetRecord[] = [
     id: "as5",
     label: "REI-0602",
     desc: "Walk-in freezer",
-    segment: "Enterprise / MNC",
     customer: "Marketplace",
     site: "Paragon",
     status: "active",
@@ -126,7 +120,6 @@ export const ASSET_RECORDS: AssetRecord[] = [
     id: "as6",
     label: "REI-0221",
     desc: "Ice cream cabinet",
-    segment: "Legacy / Shopfit",
     customer: "7-Eleven",
     site: "Clarke Quay",
     status: "decommissioned",
@@ -142,7 +135,6 @@ export const ASSET_RECORDS: AssetRecord[] = [
     id: "as7",
     label: "REI-0733",
     desc: "Prep counter chiller",
-    segment: "FROST",
     customer: "Cold Storage",
     site: "Jurong Point",
     status: "active",
@@ -155,4 +147,3 @@ export const ASSET_RECORDS: AssetRecord[] = [
   },
 ];
 
-export const ASSET_SEGMENTS = ["FROST", "Legacy / Shopfit", "Enterprise / MNC"];

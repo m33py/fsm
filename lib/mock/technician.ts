@@ -123,4 +123,3 @@ export const TECH_JOBS: TechJob[] = [
 
 export const REGISTER_CUSTOMERS = ["Cold Storage", "FairPrice Finest", "Haagen-Dazs", "Giant"];
 export const REGISTER_SITES = ["Great World", "Bugis Junction", "ION Orchard", "IMM Jurong"];
-export const REGISTER_SEGMENTS = ["FROST", "Legacy / Shopfit", "Enterprise / MNC"];
