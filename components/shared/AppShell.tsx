@@ -13,22 +13,23 @@ import {
   PlusCircle,
   type LucideIcon,
 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export type Role = "admin" | "ops_manager" | "technician";
 
-type NavItem = { label: string; icon: LucideIcon; roles: Role[] };
+type NavItem = { label: string; icon: LucideIcon; roles: Role[]; href: string };
 
 const NAV: NavItem[] = [
-  { label: "Dispatch", icon: LayoutDashboard, roles: ["admin", "ops_manager"] },
-  { label: "Jobs", icon: ClipboardList, roles: ["admin", "ops_manager"] },
-  { label: "My Jobs", icon: ClipboardCheck, roles: ["technician"] },
-  { label: "Assets", icon: Package, roles: ["admin", "ops_manager"] },
-  { label: "Register Asset", icon: PlusCircle, roles: ["technician"] },
-  { label: "Customers", icon: Building2, roles: ["admin"] },
-  { label: "Contracts", icon: FileText, roles: ["admin"] },
-  { label: "Reports", icon: BarChart3, roles: ["admin"] },
-  { label: "Settings", icon: Settings, roles: ["admin"] },
+  { label: "Dispatch", icon: LayoutDashboard, roles: ["admin", "ops_manager"], href: "/dispatch" },
+  { label: "Jobs", icon: ClipboardList, roles: ["admin", "ops_manager"], href: "#" },
+  { label: "My Jobs", icon: ClipboardCheck, roles: ["technician"], href: "/my-jobs" },
+  { label: "Assets", icon: Package, roles: ["admin", "ops_manager"], href: "#" },
+  { label: "Register Asset", icon: PlusCircle, roles: ["technician"], href: "/register-asset" },
+  { label: "Customers", icon: Building2, roles: ["admin"], href: "#" },
+  { label: "Contracts", icon: FileText, roles: ["admin"], href: "#" },
+  { label: "Reports", icon: BarChart3, roles: ["admin"], href: "#" },
+  { label: "Settings", icon: Settings, roles: ["admin"], href: "#" },
 ];
 
 /**
@@ -46,9 +47,12 @@ export function AppShell({
   user?: { name: string; role: string };
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
   const items = NAV.filter((i) => i.roles.includes(role));
   // mobile keeps at most 4 items for thumb reach
   const mobileItems = items.slice(0, 4);
+  const isActive = (item: NavItem) =>
+    item.href !== "#" && pathname ? pathname === item.href : item.label === active;
 
   return (
     <div className="flex min-h-dvh bg-surface">
@@ -60,21 +64,21 @@ export function AppShell({
         </div>
         <nav className="flex-1 space-y-0.5 px-2 py-2">
           {items.map((item) => {
-            const isActive = item.label === active;
+            const current = isActive(item);
             const Icon = item.icon;
             return (
               <a
                 key={item.label}
-                href="#"
-                aria-current={isActive ? "page" : undefined}
+                href={item.href}
+                aria-current={current ? "page" : undefined}
                 className={cn(
                   "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  isActive
+                  current
                     ? "bg-primary-tint text-primary"
                     : "text-text-secondary hover:bg-surface-muted hover:text-text"
                 )}
                 style={
-                  isActive
+                  current
                     ? { backgroundColor: "var(--primary-tint)", color: "var(--primary)" }
                     : undefined
                 }
@@ -107,16 +111,16 @@ export function AppShell({
         {/* Mobile bottom tabs */}
         <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-background md:hidden">
           {mobileItems.map((item) => {
-            const isActive = item.label === active;
+            const current = isActive(item);
             const Icon = item.icon;
             return (
               <a
                 key={item.label}
-                href="#"
-                aria-current={isActive ? "page" : undefined}
+                href={item.href}
+                aria-current={current ? "page" : undefined}
                 className={cn(
                   "flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium",
-                  isActive ? "text-primary" : "text-text-muted"
+                  current ? "text-primary" : "text-text-muted"
                 )}
               >
                 <Icon className="size-5" />
