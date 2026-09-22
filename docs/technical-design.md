@@ -13,8 +13,30 @@ Companion to `PRD.md`. This document is the schema/architecture source of truth 
 
 ## 2. Core Schema
 
+### Entity relationships (agreed)
+
+```
+Customer ──parent_customer_id──▶ Customer      (self-ref: parent company → sub-brand)
+Customer ──1:*── Site ──1:*── Asset            (asset carries current pointer + history)
+Customer ──1:*── Contract
+Asset  ──*:*── Contract   (asset_contracts — a contract's coverage is an EXPLICIT asset list)
+Job → Asset · Customer · Site · Contract(nullable)   (FKs snapshotted at creation)
+```
+
+- **Parent company → sub-brand** is modelled by a self-referencing `customers.parent_customer_id`
+  (FROST is a parent customer; Häagen-Dazs / Laughing Cow / Chobani are sub-brand customers).
+  A flat customer just has `parent_customer_id = null`. Only FROST needs this today.
+- **A contract belongs to one customer — parent OR sub-brand** (whoever signed it), and covers an
+  **explicit list of assets** via `asset_contracts`. A job's `contract_id` must be a contract that
+  the job's asset is actually linked to.
+- **Job FKs are point-in-time snapshots** (customer/site/contract copied at creation) so the record
+  stays correct after an asset later relocates. Asset movement (incl. rare cross-customer) is
+  preserved in `asset_history`.
+
 ### `customers`
-- `id`, `name`, `segment` (FK → `segments` lookup), `created_at`
+- `id`, `name`, `created_at`
+- `parent_customer_id` (FK → `customers`, nullable) — self-reference for parent company → sub-brand
+- (No `segment` — removed; see §6.)
 
 ### `sites`
 - `id`, `customer_id` (FK), `address`, `created_at`
@@ -22,10 +44,13 @@ Companion to `PRD.md`. This document is the schema/architecture source of truth 
 
 ### `assets`
 - `id`, `label` (REI-issued tracking label — primary lookup key), `manufacturer_serial` (secondary, not sole key)
-- `segment_id` (FK → `segments` lookup)
 - `criticality_tier_id` (FK → `criticality_tiers` lookup)
 - `current_customer_id`, `current_site_id` — **current pointer only**; historical assignments live in `asset_history`, not here
 - `status_id` (FK → `asset_statuses` lookup, e.g. active/in_repair/decommissioned) — current value only; history in `asset_history`
+- `purchase_date`, `warranty_end` — **base manufacturer warranty**: `warranty_end` defaults to
+  `purchase_date + 1 year`; it is the current *effective* warranty end. A purchased **extension**
+  is a `Warranty`-type contract (see `contracts`) that pushes this date forward. So warranty lives
+  in two places by design: the per-unit base end on the asset, and extensions as contracts.
 - `custom_fields` (jsonb) — safety valve for one-off attributes
 - `created_at`
 
@@ -41,14 +66,20 @@ Generic event log — one mechanism covers status changes, location/assignment c
 Writes to `assets.current_*` / `assets.status_id` must be accompanied by a row in `asset_history` in the same transaction (enforce via a Postgres trigger, not application-code discipline alone — a trigger can't be forgotten by a future code change).
 
 ### `contracts`
-- `id`, `customer_id` (FK)
+- `id`, `customer_id` (FK — may reference a **parent company or a sub-brand** customer)
 - `contract_type_id` (FK → `contract_types` lookup: Servicing / Warranty / Calibration / Ad-hoc)
+  - A **Warranty**-type contract is a purchased warranty *extension*; its term extends the covered
+    asset's effective `warranty_end`.
+- `coverage` (FK set → `coverage_types` lookup: Preventive maintenance / Reactive repair /
+  Emergency callout / Reporting / Parts) — individually selectable line items, not preset bundles
 - `response_cutoff_time`, `fulfillment_window_hours` — admin-editable SLA parameters, not hardcoded
 - `start_date`, `end_date`, `renewal_date`
 - `custom_fields` (jsonb)
 
 ### `asset_contracts` (join table — many-to-many)
 - `asset_id` (FK), `contract_id` (FK)
+- This join **is** a contract's coverage: the explicit set of assets it applies to. A job may only
+  cite a `contract_id` that its asset is linked to here.
 
 ### `jobs`
 - `id`, `asset_id` (FK), `customer_id` (FK), `site_id` (FK), `contract_id` (FK, nullable — ad-hoc jobs may not have one)
@@ -77,7 +108,7 @@ Writes to `assets.current_*` / `assets.status_id` must be accompanied by a row i
 - `id`, `job_id` (FK), `technician_id`, `notes`, `parts_used` (jsonb or separate table if parts scope expands later), `photo_urls` (text[]), `submitted_at`
 
 ### Lookup tables (rows, not enums — insertable without a schema migration)
-`segments`, `criticality_tiers`, `asset_statuses`, `contract_types`, `job_types`, `job_statuses`
+`criticality_tiers`, `asset_statuses`, `contract_types`, `coverage_types`, `job_types`, `job_statuses`
 
 ### `notification_rules`
 The one deliberate, scoped exception to "no rules engine" (see CLAUDE.md).
@@ -129,3 +160,11 @@ Covers assets, customers, sites, and contracts — all currently tracked manuall
 - Customer portal: no schema yet — deferred
 - AutoCount integration: export function only (CSV), no live API integration in this phase
 - Exact `notification_rules` UI (how an admin edits these rows) — to be designed alongside dispatch UI, not before
+- **Customer "account type" / segment**: removed. "FROST" turned out to be a customer (a
+  multi-brand parent), not a category, so parent→sub-brand hierarchy replaces it. A single
+  account-type tag on the customer (e.g. Cold-chain / Retail-shopfit / Enterprise) can be re-added
+  later purely for filtering/reporting — nothing downstream depends on it. See `design-review.md`.
+- **Interactive list controls (UX, not schema)**: dispatch/jobs/assets should share one filter
+  system — clickable stat tiles that filter the list, SLA-at-risk as a filter chip (not a one-off
+  toggle), and user-customisable/persisted columns ("filter bar + saved views" pattern). Deferred
+  as a build item after the screens' data is real.
