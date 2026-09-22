@@ -66,6 +66,24 @@ export function AppShell({
           {items.map((item) => {
             const current = isActive(item);
             const Icon = item.icon;
+            // Not-yet-built routes render as disabled with a "Soon" tag — never a
+            // live-looking link that dead-ends.
+            if (item.href === "#") {
+              return (
+                <div
+                  key={item.label}
+                  aria-disabled="true"
+                  title="Not built yet"
+                  className="flex cursor-default select-none items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-text-muted/60"
+                >
+                  <Icon className="size-4" />
+                  {item.label}
+                  <span className="ml-auto rounded bg-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-text-muted">
+                    Soon
+                  </span>
+                </div>
+              );
+            }
             return (
               <a
                 key={item.label}
@@ -113,6 +131,18 @@ export function AppShell({
           {mobileItems.map((item) => {
             const current = isActive(item);
             const Icon = item.icon;
+            if (item.href === "#") {
+              return (
+                <div
+                  key={item.label}
+                  aria-disabled="true"
+                  className="flex flex-1 cursor-default flex-col items-center gap-1 py-2.5 text-[11px] font-medium text-text-muted/40"
+                >
+                  <Icon className="size-5" />
+                  {item.label}
+                </div>
+              );
+            }
             return (
               <a
                 key={item.label}
