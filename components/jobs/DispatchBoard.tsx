@@ -127,7 +127,7 @@ export function DispatchBoard() {
     <div className="mx-auto flex h-full max-w-[1500px] flex-col gap-4 p-4 md:p-6">
       <PageHeader
         title="Dispatch"
-        description="Live job queue — every job created, dispatched, and tracked here. Not in WhatsApp."
+        description="Track, assign, and dispatch service jobs — sorted by SLA urgency."
         action={
           <Button onClick={() => setNewOpen(true)}>
             <Plus className="size-4" />
@@ -357,7 +357,7 @@ export function DispatchBoard() {
         <SheetContent
           side="right"
           title={assignJob ? `Assign ${assignJob.id}` : "Assign"}
-          description="Dispatch to a technician. Load shown so assignment is informed, not blind."
+          description="Select a technician to dispatch. Current job load is shown for each."
           className="sm:max-w-sm"
         >
           <div className="flex flex-col gap-1.5 p-4">
