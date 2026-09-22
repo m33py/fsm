@@ -46,7 +46,7 @@ export function ContractsBoard() {
     return contracts.filter((c) => {
       if (status !== "all" && c.status !== status) return false;
       if (!q) return true;
-      return [c.name, c.customer, c.coverage].join(" ").toLowerCase().includes(q);
+      return [c.name, c.customer, ...c.coverage].join(" ").toLowerCase().includes(q);
     });
   }, [contracts, query, status]);
 
@@ -125,7 +125,12 @@ export function ContractsBoard() {
                     >
                       <TableCell className="text-sm font-medium text-text">{c.name}</TableCell>
                       <TableCell className="text-sm text-text-secondary">{c.customer}</TableCell>
-                      <TableCell className="text-xs text-text-secondary">{c.coverage}</TableCell>
+                      <TableCell className="text-xs text-text-secondary">
+                        {c.coverage[0] ?? "—"}
+                        {c.coverage.length > 1 && (
+                          <span className="text-text-muted"> +{c.coverage.length - 1}</span>
+                        )}
+                      </TableCell>
                       <TableCell className="font-mono text-xs text-text-secondary">
                         {formatWindow(c.responseWindowMin)}
                       </TableCell>
@@ -162,7 +167,7 @@ export function ContractsBoard() {
                   </div>
                   <div className="inline-flex items-center gap-1 text-xs text-text-secondary">
                     <Building2 className="size-3.5 text-text-muted" />
-                    {c.customer} · {c.coverage}
+                    {c.customer} · {c.coverage.join(", ") || "—"}
                   </div>
                   <div className="flex items-center gap-4 text-xs text-text-muted">
                     <span className="font-mono">Resp {formatWindow(c.responseWindowMin)}</span>

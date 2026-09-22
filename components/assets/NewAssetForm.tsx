@@ -33,6 +33,7 @@ export function NewAssetForm({
   const [customer, setCustomer] = React.useState("");
   const [site, setSite] = React.useState("");
   const [status, setStatus] = React.useState<AssetLifecycle>("active");
+  const [warrantyEnd, setWarrantyEnd] = React.useState("");
 
   const canCreate = label.trim() && desc.trim() && customer.trim() && site.trim();
 
@@ -66,6 +67,10 @@ export function NewAssetForm({
             </SelectContent>
           </Select>
         </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="a-warranty">Warranty end <span className="font-normal text-text-muted">(optional)</span></Label>
+          <Input id="a-warranty" type="date" value={warrantyEnd} onChange={(e) => setWarrantyEnd(e.target.value)} />
+        </div>
       </div>
 
       <SheetFooter>
@@ -83,6 +88,7 @@ export function NewAssetForm({
               verified: true,
               contracts: 0,
               lastService: "—",
+              warrantyEnd: warrantyEnd || undefined,
               history: [
                 { field: "Registered", detail: "Created", at: "just now", by: "Christine", source: "admin_edit" },
               ],

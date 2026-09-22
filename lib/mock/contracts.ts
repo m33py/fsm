@@ -15,12 +15,22 @@ export const CONTRACT_STATUS: Record<
   expired: { label: "Expired", bg: "--asset-decom-bg", text: "--asset-decom-text", dot: "--asset-decom-dot" },
 };
 
+/** Coverage line items — individually selectable (lookup), not preset bundles. */
+export const COVERAGE_TYPES = [
+  "Preventive maintenance",
+  "Reactive repair",
+  "Emergency callout",
+  "Reporting",
+  "Parts & consumables",
+] as const;
+export type CoverageType = (typeof COVERAGE_TYPES)[number];
+
 export type Contract = {
   id: string;
   name: string;
   customer: string;
   status: ContractStatus;
-  coverage: string; // "Preventive + Reactive", "Reactive only", …
+  coverage: CoverageType[]; // what this contract covers
   startDate: string;
   endDate: string;
   assetsCovered: number;
@@ -36,7 +46,7 @@ export const CONTRACTS: Contract[] = [
     name: "FairPrice FROST — 2025",
     customer: "FairPrice",
     status: "active",
-    coverage: "Preventive + Reactive",
+    coverage: ["Preventive maintenance", "Reactive repair"],
     startDate: "2025-01-01",
     endDate: "2025-12-31",
     assetsCovered: 13,
@@ -49,7 +59,7 @@ export const CONTRACTS: Contract[] = [
     name: "Cold Storage PM+Reactive",
     customer: "Cold Storage",
     status: "active",
-    coverage: "Preventive + Reactive",
+    coverage: ["Preventive maintenance", "Reactive repair"],
     startDate: "2024-07-01",
     endDate: "2025-06-30",
     assetsCovered: 7,
@@ -62,7 +72,7 @@ export const CONTRACTS: Contract[] = [
     name: "Sheng Siong Reactive",
     customer: "Sheng Siong",
     status: "expiring_soon",
-    coverage: "Reactive only",
+    coverage: ["Reactive repair"],
     startDate: "2024-11-01",
     endDate: "2025-10-31",
     assetsCovered: 3,
@@ -75,7 +85,7 @@ export const CONTRACTS: Contract[] = [
     name: "Giant Legacy",
     customer: "Giant",
     status: "active",
-    coverage: "Reactive only",
+    coverage: ["Reactive repair"],
     startDate: "2025-03-01",
     endDate: "2026-02-28",
     assetsCovered: 4,
@@ -88,7 +98,7 @@ export const CONTRACTS: Contract[] = [
     name: "Marketplace MNC SLA",
     customer: "Marketplace",
     status: "active",
-    coverage: "Preventive + Reactive + Reporting",
+    coverage: ["Preventive maintenance", "Reactive repair", "Reporting"],
     startDate: "2025-01-15",
     endDate: "2027-01-14",
     assetsCovered: 5,
@@ -101,7 +111,7 @@ export const CONTRACTS: Contract[] = [
     name: "Swensen's Ad-hoc (lapsed)",
     customer: "Swensen's",
     status: "expired",
-    coverage: "Reactive only",
+    coverage: ["Reactive repair"],
     startDate: "2023-06-01",
     endDate: "2024-05-31",
     assetsCovered: 0,
@@ -111,8 +121,3 @@ export const CONTRACTS: Contract[] = [
   },
 ];
 
-export const CONTRACT_COVERAGES = [
-  "Preventive + Reactive",
-  "Reactive only",
-  "Preventive + Reactive + Reporting",
-];

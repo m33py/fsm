@@ -5,14 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SheetFooter } from "@/components/ui/sheet";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { CONTRACT_COVERAGES, type Contract } from "@/lib/mock/contracts";
+import { COVERAGE_TYPES, type Contract, type CoverageType } from "@/lib/mock/contracts";
+import { cn } from "@/lib/utils";
 
 /** Admin: add a service contract with its SLA parameters. */
 export function NewContractForm({
@@ -24,7 +18,7 @@ export function NewContractForm({
 }) {
   const [name, setName] = React.useState("");
   const [customer, setCustomer] = React.useState("");
-  const [coverage, setCoverage] = React.useState(CONTRACT_COVERAGES[0]);
+  const [coverage, setCoverage] = React.useState<CoverageType[]>(["Reactive repair"]);
   const [startDate, setStartDate] = React.useState("");
   const [endDate, setEndDate] = React.useState("");
   const [responseWindowMin, setResponseWindowMin] = React.useState("240");
@@ -46,14 +40,32 @@ export function NewContractForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <Label>Coverage</Label>
-          <Select value={coverage} onValueChange={setCoverage}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {CONTRACT_COVERAGES.map((c) => (
-                <SelectItem key={c} value={c}>{c}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col gap-1.5 rounded-lg border border-border p-2">
+            {COVERAGE_TYPES.map((c) => {
+              const checked = coverage.includes(c);
+              return (
+                <label
+                  key={c}
+                  className={cn(
+                    "flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors",
+                    checked ? "bg-primary-tint text-primary" : "text-text hover:bg-surface-muted"
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) =>
+                      setCoverage((prev) =>
+                        e.target.checked ? [...prev, c] : prev.filter((x) => x !== c)
+                      )
+                    }
+                    className="size-4 accent-[var(--primary)]"
+                  />
+                  {c}
+                </label>
+              );
+            })}
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">

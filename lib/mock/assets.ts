@@ -36,14 +36,27 @@ export type AssetRecord = {
   verified: boolean;
   contracts: number;
   lastService: string; // display label, "—" if none
+  warrantyEnd?: string; // ISO date; undefined = no warranty on record
   history: AssetHistoryEvent[];
 };
+
+export type WarrantyTone = "ok" | "warn" | "expired" | "none";
+
+/** Derive warranty status from the end date (relative to today). */
+export function warrantyStatus(end?: string): { label: string; tone: WarrantyTone } {
+  if (!end) return { label: "No warranty on record", tone: "none" };
+  const days = Math.round((new Date(end).getTime() - Date.now()) / 86_400_000);
+  if (days < 0) return { label: `Expired · ${end}`, tone: "expired" };
+  if (days <= 60) return { label: `Expiring · ${end}`, tone: "warn" };
+  return { label: `Under warranty · ${end}`, tone: "ok" };
+}
 
 export const ASSET_RECORDS: AssetRecord[] = [
   {
     id: "as1",
     label: "REI-0417",
     desc: "Display freezer",
+    warrantyEnd: "2027-06-30",
     customer: "FairPrice",
     site: "Bugis Junction",
     status: "active",
@@ -60,6 +73,7 @@ export const ASSET_RECORDS: AssetRecord[] = [
     id: "as2",
     label: "REI-0312",
     desc: "2-door chiller",
+    warrantyEnd: "2025-06-30",
     customer: "Cold Storage",
     site: "Great World",
     status: "in_repair",
@@ -90,6 +104,7 @@ export const ASSET_RECORDS: AssetRecord[] = [
     id: "as4",
     label: "REI-0129",
     desc: "Blast chiller",
+    warrantyEnd: "2026-11-10",
     customer: "Giant",
     site: "IMM Jurong",
     status: "active",
@@ -105,6 +120,7 @@ export const ASSET_RECORDS: AssetRecord[] = [
     id: "as5",
     label: "REI-0602",
     desc: "Walk-in freezer",
+    warrantyEnd: "2028-01-19",
     customer: "Marketplace",
     site: "Paragon",
     status: "active",
@@ -120,6 +136,7 @@ export const ASSET_RECORDS: AssetRecord[] = [
     id: "as6",
     label: "REI-0221",
     desc: "Ice cream cabinet",
+    warrantyEnd: "2024-05-31",
     customer: "7-Eleven",
     site: "Clarke Quay",
     status: "decommissioned",

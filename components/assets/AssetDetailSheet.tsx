@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetClose } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { HISTORY_SOURCE, type AssetRecord } from "@/lib/mock/assets";
+import { HISTORY_SOURCE, warrantyStatus, type AssetRecord } from "@/lib/mock/assets";
 
 /**
  * Asset detail — the record plus its append-only history (asset_history:
@@ -59,6 +59,14 @@ export function AssetDetailSheet({
                   value={asset.lastService}
                   icon={<Wrench className="size-3.5" />}
                 />
+                <Separator className="my-2.5" />
+                <div className="flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-1.5 text-text-muted">
+                    <ShieldCheck className="size-3.5" />
+                    Warranty
+                  </span>
+                  <WarrantyChip end={asset.warrantyEnd} />
+                </div>
               </div>
 
               {/* Verify (unverified only) */}
@@ -109,6 +117,26 @@ export function AssetDetailSheet({
         )}
       </SheetContent>
     </Sheet>
+  );
+}
+
+const WARRANTY_TONE: Record<string, { bg: string; text: string }> = {
+  ok: { bg: "--asset-active-bg", text: "--asset-active-text" },
+  warn: { bg: "--sla-atrisk-bg", text: "--sla-atrisk-text" },
+  expired: { bg: "--sla-breached-bg", text: "--sla-breached-text" },
+  none: { bg: "--asset-decom-bg", text: "--asset-decom-text" },
+};
+
+function WarrantyChip({ end }: { end?: string }) {
+  const { label, tone } = warrantyStatus(end);
+  const t = WARRANTY_TONE[tone];
+  return (
+    <span
+      className="rounded-md px-2 py-0.5 text-xs font-medium"
+      style={{ backgroundColor: `var(${t.bg})`, color: `var(${t.text})` }}
+    >
+      {label}
+    </span>
   );
 }
 
