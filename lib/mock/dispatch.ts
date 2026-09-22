@@ -66,66 +66,51 @@ export const CONTRACTS_BY_ASSET: Record<string, Contract[]> = {
   a5: [{ id: "c5", name: "Marketplace MNC SLA", responseWindowMin: 90 }],
 };
 
+/** One row of the SLA timeline in the job-detail sheet. `time` undefined = not reached yet. */
+export type JobEvent = { label: string; time?: string };
+
 export type Job = {
   id: string; // human ref, mono in UI
   status: JobStatus;
   type: JobType;
   criticality: Criticality;
   assetLabel: string;
+  assetDesc: string; // e.g. "2-door chiller"
   customer: string;
   site: string;
   assignedTo?: string; // technician name, undefined = unassigned
   /** Minutes to SLA response deadline; negative = breached. Undefined = no contract / no SLA. */
   slaMinutesRemaining?: number;
+  /** Time in current state, for the Age column. */
+  age: string;
   /** ISO-ish display string for when it entered its current state. */
   updatedLabel: string;
+  note: string;
+  /** Append-only SLA timeline (maps to alert_received_at → resolved_at). */
+  events: JobEvent[];
 };
 
 export const JOBS: Job[] = [
   {
-    id: "J-2041",
-    status: "created",
+    id: "J-2031",
+    status: "escalated",
     type: "alert",
     criticality: "critical",
-    assetLabel: "REI-0417",
-    customer: "FairPrice",
-    site: "Bugis Junction",
-    slaMinutesRemaining: 18,
-    updatedLabel: "2m ago",
-  },
-  {
-    id: "J-2040",
-    status: "created",
-    type: "ad_hoc",
-    criticality: "standard",
-    assetLabel: "REI-0588",
-    customer: "Sheng Siong",
-    site: "Tampines Ave 4",
-    updatedLabel: "9m ago",
-  },
-  {
-    id: "J-2039",
-    status: "dispatched",
-    type: "alert",
-    criticality: "high",
     assetLabel: "REI-0602",
+    assetDesc: "Walk-in freezer",
     customer: "Marketplace",
     site: "Paragon",
-    assignedTo: "Wei Ming",
-    slaMinutesRemaining: 62,
-    updatedLabel: "14m ago",
-  },
-  {
-    id: "J-2037",
-    status: "accepted",
-    type: "scheduled",
-    criticality: "standard",
-    assetLabel: "REI-0129",
-    customer: "Giant",
-    site: "IMM Jurong",
-    assignedTo: "Rajesh",
-    slaMinutesRemaining: 210,
-    updatedLabel: "26m ago",
+    assignedTo: "Suresh",
+    slaMinutesRemaining: -95,
+    age: "1h 42m",
+    updatedLabel: "1h ago",
+    note: "Compressor cycling irregularly; customer called twice.",
+    events: [
+      { label: "Alert received", time: "11:16" },
+      { label: "Response dispatched", time: "11:22" },
+      { label: "On-site", time: "11:58" },
+      { label: "Resolved" },
+    ],
   },
   {
     id: "J-2035",
@@ -133,11 +118,101 @@ export const JOBS: Job[] = [
     type: "alert",
     criticality: "critical",
     assetLabel: "REI-0312",
+    assetDesc: "2-door chiller",
     customer: "Cold Storage",
     site: "Great World",
     assignedTo: "Suresh",
     slaMinutesRemaining: -24,
+    age: "54m",
     updatedLabel: "41m ago",
+    note: "Temperature spike above 8°C sustained; on-site diagnosing.",
+    events: [
+      { label: "Alert received", time: "12:04" },
+      { label: "Response dispatched", time: "12:10" },
+      { label: "On-site", time: "12:38" },
+      { label: "Resolved" },
+    ],
+  },
+  {
+    id: "J-2041",
+    status: "created",
+    type: "alert",
+    criticality: "critical",
+    assetLabel: "REI-0417",
+    assetDesc: "Display freezer",
+    customer: "FairPrice",
+    site: "Bugis Junction",
+    slaMinutesRemaining: 18,
+    age: "8m",
+    updatedLabel: "2m ago",
+    note: "Chiller alarm active after power reset. No technician assigned yet.",
+    events: [
+      { label: "Alert received", time: "12:50" },
+      { label: "Response dispatched" },
+      { label: "On-site" },
+      { label: "Resolved" },
+    ],
+  },
+  {
+    id: "J-2039",
+    status: "dispatched",
+    type: "alert",
+    criticality: "high",
+    assetLabel: "REI-0602",
+    assetDesc: "Ice cream cabinet",
+    customer: "Marketplace",
+    site: "Paragon",
+    assignedTo: "Wei Ming",
+    slaMinutesRemaining: 62,
+    age: "26m",
+    updatedLabel: "14m ago",
+    note: "Cabinet not holding setpoint; en route.",
+    events: [
+      { label: "Alert received", time: "12:32" },
+      { label: "Response dispatched", time: "12:36" },
+      { label: "On-site" },
+      { label: "Resolved" },
+    ],
+  },
+  {
+    id: "J-2037",
+    status: "accepted",
+    type: "scheduled",
+    criticality: "standard",
+    assetLabel: "REI-0129",
+    assetDesc: "Blast chiller",
+    customer: "Giant",
+    site: "IMM Jurong",
+    assignedTo: "Rajesh",
+    slaMinutesRemaining: 210,
+    age: "32m",
+    updatedLabel: "26m ago",
+    note: "Quarterly preventive maintenance. Technician acknowledged.",
+    events: [
+      { label: "Scheduled", time: "13:00" },
+      { label: "Response dispatched", time: "13:04" },
+      { label: "On-site" },
+      { label: "Resolved" },
+    ],
+  },
+  {
+    id: "J-2040",
+    status: "created",
+    type: "ad_hoc",
+    criticality: "standard",
+    assetLabel: "REI-0588",
+    assetDesc: "Door seal (chiller)",
+    customer: "Sheng Siong",
+    site: "Tampines Ave 4",
+    age: "9m",
+    updatedLabel: "9m ago",
+    note: "Door seal replacement requested by site manager. Ad-hoc, no contract.",
+    events: [
+      { label: "Reported", time: "12:49" },
+      { label: "Response dispatched" },
+      { label: "On-site" },
+      { label: "Resolved" },
+    ],
   },
   {
     id: "J-2033",
@@ -145,21 +220,18 @@ export const JOBS: Job[] = [
     type: "scheduled",
     criticality: "standard",
     assetLabel: "REI-0417",
+    assetDesc: "Display freezer",
     customer: "FairPrice",
     site: "Bugis Junction",
     assignedTo: "Rajesh",
+    age: "2h 14m",
     updatedLabel: "1h ago",
-  },
-  {
-    id: "J-2031",
-    status: "escalated",
-    type: "alert",
-    criticality: "critical",
-    assetLabel: "REI-0602",
-    customer: "Marketplace",
-    site: "Paragon",
-    assignedTo: "Suresh",
-    slaMinutesRemaining: -95,
-    updatedLabel: "1h ago",
+    note: "Thermostat replaced and tested. Awaiting admin verification.",
+    events: [
+      { label: "Alert received", time: "10:02" },
+      { label: "Response dispatched", time: "10:14" },
+      { label: "On-site", time: "10:42" },
+      { label: "Resolved", time: "11:08" },
+    ],
   },
 ];

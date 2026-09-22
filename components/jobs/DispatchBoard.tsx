@@ -1,103 +1,95 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Search, AlertTriangle, Timer, Inbox, Activity } from "lucide-react";
+import {
+  Plus,
+  Search,
+  AlertTriangle,
+  MapPin,
+  ClipboardList,
+  Gauge,
+  UserPlus,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { JobCard } from "@/components/jobs/JobCard";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { JobTypeChip } from "@/components/shared/JobTypeChip";
+import { SlaChip, slaStateFromMinutes } from "@/components/shared/SlaChip";
 import { NewJobForm } from "@/components/jobs/NewJobForm";
-import { slaStateFromMinutes } from "@/components/shared/SlaChip";
-import { JOB_STATUS, JOB_TYPE, type JobStatus, type JobType } from "@/lib/status";
+import { JobDetailSheet } from "@/components/jobs/JobDetailSheet";
+import { JOB_TYPE, type JobType } from "@/lib/status";
 import { JOBS, TECHNICIANS, type Job } from "@/lib/mock/dispatch";
 import { cn } from "@/lib/utils";
 
-/** Board lanes = the operational slice of the FSM (terminal "closed" lives off-board). */
-const LANES: { status: JobStatus; title: string }[] = [
-  { status: "created", title: "Unassigned" },
-  { status: "dispatched", title: "Dispatched" },
-  { status: "accepted", title: "Accepted / En-route" },
-  { status: "on_site", title: "On-site" },
-  { status: "resolved", title: "Resolved" },
-  { status: "escalated", title: "Escalated" },
-];
-
-/** Pipeline order for the mobile list's secondary sort (most-urgent stage first). */
-const STATUS_RANK: Record<JobStatus, number> = {
-  escalated: 0,
-  on_site: 1,
-  accepted: 2,
-  dispatched: 3,
-  created: 4,
-  resolved: 5,
-  closed: 6,
-};
-
-/** Mobile sort: breached SLA first, then at-risk, then by pipeline stage. */
-function urgencyKey(j: Job): number {
-  let slaRank = 3;
-  if (j.slaMinutesRemaining !== undefined) {
-    const s = slaStateFromMinutes(j.slaMinutesRemaining);
-    slaRank = s === "breached" ? 0 : s === "at_risk" ? 1 : 2;
-  }
-  return slaRank * 10 + STATUS_RANK[j.status];
-}
-
 type TypeFilter = JobType | "all";
-type StatusFilter = JobStatus | "all";
+
+/** SLA-urgency sort key: breached first, then at-risk, then by minutes remaining. */
+function urgencyRank(j: Job): number {
+  if (j.slaMinutesRemaining === undefined) return 3;
+  const s = slaStateFromMinutes(j.slaMinutesRemaining);
+  return s === "breached" ? 0 : s === "at_risk" ? 1 : 2;
+}
 
 export function DispatchBoard() {
   const [jobs, setJobs] = React.useState<Job[]>(JOBS);
   const [query, setQuery] = React.useState("");
   const [typeFilter, setTypeFilter] = React.useState<TypeFilter>("all");
-  const [statusFilter, setStatusFilter] = React.useState<StatusFilter>("all"); // mobile lane picker
+  const [riskOnly, setRiskOnly] = React.useState(false);
   const [newOpen, setNewOpen] = React.useState(false);
+  const [detailJob, setDetailJob] = React.useState<Job | null>(null);
   const [assignJob, setAssignJob] = React.useState<Job | null>(null);
 
-  const filtered = React.useMemo(() => {
+  const rows = React.useMemo(() => {
     const q = query.trim().toLowerCase();
-    return jobs.filter((j) => {
-      if (typeFilter !== "all" && j.type !== typeFilter) return false;
-      if (!q) return true;
-      return [j.id, j.customer, j.site, j.assetLabel]
-        .join(" ")
-        .toLowerCase()
-        .includes(q);
-    });
-  }, [jobs, query, typeFilter]);
-
-  // Mobile list: apply the status chip, then sort by urgency.
-  const mobileList = React.useMemo(() => {
-    return filtered
-      .filter((j) => (statusFilter === "all" ? true : j.status === statusFilter))
-      .sort((a, b) => urgencyKey(a) - urgencyKey(b));
-  }, [filtered, statusFilter]);
+    return jobs
+      .filter((j) => {
+        if (typeFilter !== "all" && j.type !== typeFilter) return false;
+        if (riskOnly) {
+          if (j.slaMinutesRemaining === undefined) return false;
+          if (slaStateFromMinutes(j.slaMinutesRemaining) === "ok") return false;
+        }
+        if (!q) return true;
+        return [j.id, j.assetLabel, j.customer, j.site, j.assignedTo ?? ""]
+          .join(" ")
+          .toLowerCase()
+          .includes(q);
+      })
+      .sort((a, b) => {
+        const r = urgencyRank(a) - urgencyRank(b);
+        if (r !== 0) return r;
+        return (a.slaMinutesRemaining ?? 1e9) - (b.slaMinutesRemaining ?? 1e9);
+      });
+  }, [jobs, query, typeFilter, riskOnly]);
 
   const stats = React.useMemo(() => {
-    const unassigned = jobs.filter((j) => j.status === "created").length;
-    const inProgress = jobs.filter((j) =>
-      ["dispatched", "accepted", "on_site"].includes(j.status)
-    ).length;
+    const open = jobs.filter((j) => !["resolved", "closed"].includes(j.status)).length;
+    const onSite = jobs.filter((j) => j.status === "on_site").length;
     let atRisk = 0;
-    let breached = 0;
     for (const j of jobs) {
       if (j.slaMinutesRemaining === undefined) continue;
-      const s = slaStateFromMinutes(j.slaMinutesRemaining);
-      if (s === "at_risk") atRisk++;
-      if (s === "breached") breached++;
+      if (slaStateFromMinutes(j.slaMinutesRemaining) !== "ok") atRisk++;
     }
-    return { unassigned, inProgress, atRisk, breached };
+    const activeTechs = new Set(jobs.filter((j) => j.assignedTo).map((j) => j.assignedTo)).size;
+    return { open, onSite, atRisk, activeTechs };
   }, [jobs]);
+
+  const typeCount = (t: TypeFilter) =>
+    t === "all" ? jobs.length : jobs.filter((j) => j.type === t).length;
 
   function handleCreate(job: Job, dispatch: boolean) {
     setJobs((prev) => [job, ...prev]);
@@ -105,7 +97,7 @@ export function DispatchBoard() {
     toast.success(
       dispatch
         ? `${job.id} created & dispatched to ${job.assignedTo}`
-        : `${job.id} created — waiting on the board`
+        : `${job.id} created — waiting in the queue`
     );
   }
 
@@ -123,14 +115,19 @@ export function DispatchBoard() {
     setAssignJob(null);
   }
 
-  const countFor = (s: StatusFilter) =>
-    s === "all" ? filtered.length : filtered.filter((j) => j.status === s).length;
+  function handleEscalate(job: Job) {
+    setJobs((prev) =>
+      prev.map((j) => (j.id === job.id ? { ...j, status: "escalated" } : j))
+    );
+    toast.warning(`${job.id} escalated`);
+    setDetailJob(null);
+  }
 
   return (
-    <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-4 p-4 md:p-6">
+    <div className="mx-auto flex h-full max-w-[1500px] flex-col gap-4 p-4 md:p-6">
       <PageHeader
-        title="Dispatch board"
-        description="Every job, live — created, dispatched, and tracked here. Not in WhatsApp."
+        title="Dispatch"
+        description="Live job queue — every job created, dispatched, and tracked here. Not in WhatsApp."
         action={
           <Button onClick={() => setNewOpen(true)}>
             <Plus className="size-4" />
@@ -139,136 +136,215 @@ export function DispatchBoard() {
         }
       />
 
-      {/* Summary tiles — one compact row on mobile, roomier on desktop */}
-      <div className="grid grid-cols-4 gap-2 md:gap-3">
-        <StatTile icon={<Inbox className="size-4" />} label="Unassigned" value={stats.unassigned} />
-        <StatTile icon={<Activity className="size-4" />} label="In progress" value={stats.inProgress} />
-        <StatTile
-          icon={<Timer className="size-4" />}
+      {/* Toolbar: search · SLA-at-risk toggle · job-type tabs */}
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search jobs, assets, sites or technicians…"
+              className="pl-9"
+            />
+          </div>
+          <label className="flex h-10 items-center gap-2 rounded-lg border border-border bg-background px-3">
+            <Switch checked={riskOnly} onCheckedChange={setRiskOnly} />
+            <span className="whitespace-nowrap text-xs font-medium text-text-secondary">
+              SLA at risk
+            </span>
+          </label>
+        </div>
+        <Tabs value={typeFilter} onValueChange={(v) => setTypeFilter(v as TypeFilter)}>
+          <TabsList>
+            <TabsTrigger value="all">
+              All <span className="text-text-muted">{typeCount("all")}</span>
+            </TabsTrigger>
+            {(Object.keys(JOB_TYPE) as JobType[]).map((t) => (
+              <TabsTrigger key={t} value={t}>
+                {JOB_TYPE[t]} <span className="text-text-muted">{typeCount(t)}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </div>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard label="Open jobs" value={stats.open} icon={<ClipboardList className="size-4" />} />
+        <StatCard
           label="At risk"
           value={stats.atRisk}
-          tone={stats.atRisk > 0 ? "warning" : undefined}
-        />
-        <StatTile
           icon={<AlertTriangle className="size-4" />}
-          label="Breached"
-          value={stats.breached}
-          tone={stats.breached > 0 ? "danger" : undefined}
+          tone={stats.atRisk > 0 ? "danger" : undefined}
+        />
+        <StatCard label="On-site" value={stats.onSite} icon={<MapPin className="size-4" />} />
+        <StatCard
+          label="Techs active"
+          value={stats.activeTechs}
+          suffix={` / ${TECHNICIANS.length}`}
+          icon={<Gauge className="size-4" />}
         />
       </div>
 
-      {/* Search + type filter */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search job, customer, site, or asset tag…"
-            className="pl-9"
-          />
-        </div>
-        <div className="w-full sm:w-44">
-          <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as TypeFilter)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All types</SelectItem>
-              {(Object.keys(JOB_TYPE) as JobType[]).map((t) => (
-                <SelectItem key={t} value={t}>
-                  {JOB_TYPE[t]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* ============================ MOBILE: status chips + priority list ==================== */}
-      <div className="flex flex-col gap-3 md:hidden">
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
-          <StatusChip label="All" active={statusFilter === "all"} count={countFor("all")} onClick={() => setStatusFilter("all")} />
-          {LANES.map((lane) => (
-            <StatusChip
-              key={lane.status}
-              label={lane.title}
-              dot={JOB_STATUS[lane.status].dot}
-              active={statusFilter === lane.status}
-              count={countFor(lane.status)}
-              onClick={() => setStatusFilter(lane.status)}
-            />
-          ))}
-        </div>
-
-        {mobileList.length === 0 ? (
-          <EmptyState
-            icon={<Search className="size-6" />}
-            title="No jobs here"
-            description="Adjust the search, type, or status filter."
-          />
-        ) : (
-          <div className="flex flex-col gap-2">
-            {mobileList.map((job) => (
-              <JobCard
-                key={job.id}
-                job={job}
-                showStatus
-                onAssign={job.status === "created" ? setAssignJob : undefined}
-              />
-            ))}
+      {/* Live job queue */}
+      <Card className="overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <div>
+            <div className="text-sm font-semibold text-text">Live job queue</div>
+            <div className="mt-0.5 text-xs text-text-muted">
+              {rows.length} {rows.length === 1 ? "job" : "jobs"} · sorted by SLA urgency
+            </div>
           </div>
+        </div>
+
+        {rows.length === 0 ? (
+          <div className="p-4">
+            <EmptyState
+              icon={<Search className="size-6" />}
+              title="No jobs match"
+              description="Adjust the search, type tab, or the SLA-at-risk toggle."
+            />
+          </div>
+        ) : (
+          <>
+            {/* Desktop table */}
+            <div className="hidden overflow-x-auto md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-surface-muted/60">
+                    <TableHead className="w-[150px]">Status</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Asset</TableHead>
+                    <TableHead>Customer / site</TableHead>
+                    <TableHead>Technician</TableHead>
+                    <TableHead>SLA countdown</TableHead>
+                    <TableHead>Age</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rows.map((job) => {
+                    const atRisk =
+                      job.slaMinutesRemaining !== undefined &&
+                      slaStateFromMinutes(job.slaMinutesRemaining) !== "ok";
+                    return (
+                      <TableRow
+                        key={job.id}
+                        onClick={() => setDetailJob(job)}
+                        className={cn(
+                          "cursor-pointer hover:bg-surface-muted/50",
+                          atRisk && "bg-[var(--sla-breached-bg)]/30"
+                        )}
+                      >
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <StatusBadge status={job.status} />
+                            <span className="font-mono text-[10px] text-text-muted">{job.id}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <JobTypeChip type={job.type} />
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-mono text-xs font-medium text-text">
+                            {job.assetLabel}
+                          </div>
+                          <div className="text-xs text-text-muted">{job.assetDesc}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[220px] text-sm font-medium text-text">
+                            {job.customer}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-text-muted">
+                            <MapPin className="size-3" />
+                            {job.site}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <TechCell job={job} onAssign={() => setAssignJob(job)} />
+                        </TableCell>
+                        <TableCell>
+                          {job.slaMinutesRemaining !== undefined ? (
+                            <SlaChip minutesRemaining={job.slaMinutesRemaining} />
+                          ) : (
+                            <span className="text-xs text-text-muted">No SLA</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs text-text-muted">{job.age}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile stacked list */}
+            <div className="flex flex-col md:hidden">
+              {rows.map((job) => (
+                <button
+                  key={job.id}
+                  onClick={() => setDetailJob(job)}
+                  className="flex flex-col gap-3 border-b border-border p-4 text-left last:border-b-0 active:bg-surface-muted/60"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <StatusBadge status={job.status} />
+                      <JobTypeChip type={job.type} />
+                    </div>
+                    <span className="font-mono text-[10px] text-text-muted">{job.id}</span>
+                  </div>
+                  <div>
+                    <div className="font-mono text-sm font-semibold text-text">
+                      {job.assetLabel}{" "}
+                      <span className="font-sans font-normal text-text-muted">· {job.assetDesc}</span>
+                    </div>
+                    <div className="mt-1 flex items-center gap-1.5 text-sm text-text-secondary">
+                      <MapPin className="size-3.5" />
+                      {job.customer} — {job.site}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <TechCell job={job} onAssign={() => setAssignJob(job)} />
+                    <div className="flex flex-col items-end gap-1">
+                      {job.slaMinutesRemaining !== undefined ? (
+                        <SlaChip minutesRemaining={job.slaMinutesRemaining} />
+                      ) : (
+                        <span className="text-[11px] text-text-muted">No SLA</span>
+                      )}
+                      <span className="font-mono text-[10px] text-text-muted">Age {job.age}</span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </>
         )}
-      </div>
+      </Card>
 
-      {/* ============================ DESKTOP: kanban lanes ================================== */}
-      <div className="hidden flex-1 gap-3 overflow-x-auto pb-2 md:flex [scroll-snap-type:x_proximity]">
-        {LANES.map((lane) => {
-          const laneJobs = filtered.filter((j) => j.status === lane.status);
-          const dot = JOB_STATUS[lane.status].dot;
-          return (
-            <section
-              key={lane.status}
-              className="flex w-72 shrink-0 flex-col gap-2 [scroll-snap-align:start]"
-            >
-              <div className="flex items-center gap-2 px-1">
-                <span className="size-2 rounded-full" style={{ backgroundColor: `var(${dot})` }} />
-                <h2 className="text-sm font-semibold text-text">{lane.title}</h2>
-                <span className="rounded-full bg-surface-muted px-1.5 text-xs font-medium text-text-secondary">
-                  {laneJobs.length}
-                </span>
-              </div>
-              <div className="flex flex-col gap-2 rounded-lg bg-surface-muted/50 p-2">
-                {laneJobs.length === 0 ? (
-                  <p className="px-1 py-6 text-center text-xs text-text-muted">Nothing here</p>
-                ) : (
-                  laneJobs.map((job) => (
-                    <JobCard
-                      key={job.id}
-                      job={job}
-                      onAssign={lane.status === "created" ? setAssignJob : undefined}
-                    />
-                  ))
-                )}
-              </div>
-            </section>
-          );
-        })}
-      </div>
-
-      {/* New Job slide-over (the one create/edit pattern) */}
+      {/* New Job slide-over */}
       <Sheet open={newOpen} onOpenChange={setNewOpen}>
         <SheetContent
           side="right"
           title="New Job"
-          description="Create a job and hand it to the board or a technician."
+          description="Create a job and hand it to the queue or a technician."
           className="sm:max-w-md"
         >
           <NewJobForm onCreate={handleCreate} onCancel={() => setNewOpen(false)} />
         </SheetContent>
       </Sheet>
 
-      {/* Assign technician — bottom sheet on mobile, side panel on desktop */}
+      {/* Job detail */}
+      <JobDetailSheet
+        job={detailJob}
+        onOpenChange={(o) => !o && setDetailJob(null)}
+        onEscalate={handleEscalate}
+        onReassign={(j) => {
+          setDetailJob(null);
+          setAssignJob(j);
+        }}
+      />
+
+      {/* Assign / reassign technician */}
       <Sheet open={assignJob !== null} onOpenChange={(o) => !o && setAssignJob(null)}>
         <SheetContent
           side="right"
@@ -300,59 +376,64 @@ export function DispatchBoard() {
   );
 }
 
-function StatTile({
-  icon,
-  label,
-  value,
-  tone,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-  tone?: "warning" | "danger";
-}) {
-  const color =
-    tone === "danger" ? "var(--danger)" : tone === "warning" ? "var(--warning)" : undefined;
+function TechCell({ job, onAssign }: { job: Job; onAssign: () => void }) {
+  if (job.assignedTo) {
+    return (
+      <span className="inline-flex items-center gap-2 text-sm text-text">
+        <span className="flex size-7 items-center justify-center rounded-full bg-primary-tint text-[10px] font-semibold text-primary">
+          {job.assignedTo.slice(0, 1)}
+        </span>
+        <span className="whitespace-nowrap">{job.assignedTo}</span>
+      </span>
+    );
+  }
   return (
-    <div className="rounded-lg border border-border bg-card p-2.5 md:p-3">
-      <div className="flex items-center gap-1.5 text-[10px] font-medium text-text-secondary md:text-xs">
-        <span className="hidden md:inline-flex" style={color ? { color } : undefined}>{icon}</span>
-        <span className="truncate">{label}</span>
-      </div>
-      <div className="mt-0.5 text-xl font-semibold md:mt-1 md:text-2xl" style={color ? { color } : undefined}>
-        {value}
-      </div>
-    </div>
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={(e) => {
+        e.stopPropagation();
+        onAssign();
+      }}
+    >
+      <UserPlus className="size-3.5" />
+      Assign
+    </Button>
   );
 }
 
-function StatusChip({
+function StatCard({
   label,
-  count,
-  active,
-  dot,
-  onClick,
+  value,
+  icon,
+  suffix,
+  tone,
 }: {
   label: string;
-  count: number;
-  active: boolean;
-  dot?: string;
-  onClick: () => void;
+  value: number;
+  icon: React.ReactNode;
+  suffix?: string;
+  tone?: "danger";
 }) {
+  const color = tone === "danger" ? "var(--danger)" : undefined;
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-        active
-          ? "border-primary bg-primary-tint text-primary"
-          : "border-border bg-background text-text-secondary"
-      )}
+    <Card
+      className={cn(tone === "danger" && value > 0 && "border-[var(--danger)]/40")}
+      style={tone === "danger" && value > 0 ? { backgroundColor: "var(--sla-breached-bg)" } : undefined}
     >
-      {dot && <span className="size-2 rounded-full" style={{ backgroundColor: `var(${dot})` }} />}
-      {label}
-      <span className={cn("tabular-nums", active ? "text-primary" : "text-text-muted")}>{count}</span>
-    </button>
+      <CardContent className="p-3 pt-3">
+        <div
+          className="flex items-center justify-between text-xs font-medium text-text-secondary"
+          style={color ? { color } : undefined}
+        >
+          <span>{label}</span>
+          {icon}
+        </div>
+        <div className="mt-1 text-2xl font-semibold text-text" style={color ? { color } : undefined}>
+          {value}
+          {suffix && <span className="ml-1 text-sm font-normal text-text-muted">{suffix}</span>}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

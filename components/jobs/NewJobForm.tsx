@@ -61,6 +61,7 @@ export function NewJobForm({
   const [assetId, setAssetId] = React.useState<string>("");
   const [contractId, setContractId] = React.useState<string>("");
   const [criticality, setCriticality] = React.useState<Criticality>("standard");
+  const [note, setNote] = React.useState("");
   const [assignNow, setAssignNow] = React.useState(false);
   const [technicianId, setTechnicianId] = React.useState<string>("");
 
@@ -86,11 +87,20 @@ export function NewJobForm({
       type,
       criticality,
       assetLabel: asset.label,
+      assetDesc: asset.segment,
       customer: asset.customer,
       site: asset.site,
       assignedTo: dispatch ? tech?.name : undefined,
       slaMinutesRemaining: contract?.responseWindowMin,
+      age: "just now",
       updatedLabel: "just now",
+      note: note.trim(),
+      events: [
+        { label: type === "scheduled" ? "Scheduled" : "Alert received", time: "now" },
+        { label: "Response dispatched", ...(dispatch ? { time: "now" } : {}) },
+        { label: "On-site" },
+        { label: "Resolved" },
+      ],
     };
   }
 
@@ -195,6 +205,16 @@ export function NewJobForm({
               ))}
             </SelectContent>
           </Select>
+        </Field>
+
+        {/* Note */}
+        <Field label="Note" hint="Context for the technician (optional).">
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="What's the issue, access details, anything the tech should know…"
+            className="min-h-20 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm text-text outline-none transition-colors placeholder:text-text-muted focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring"
+          />
         </Field>
 
         {/* Assign-now fork */}
