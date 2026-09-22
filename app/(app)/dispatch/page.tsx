@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/shared/AppShell";
 import { DispatchBoard } from "@/components/jobs/DispatchBoard";
+import { BACKOFFICE } from "@/lib/demo";
 
 /**
  * Dispatch board — the ops_manager's home screen for creating, assigning, and
@@ -11,11 +12,7 @@ import { DispatchBoard } from "@/components/jobs/DispatchBoard";
  */
 export default function DispatchPage() {
   return (
-    <AppShell
-      role="ops_manager"
-      active="Dispatch"
-      user={{ name: "Mervyn", role: "Ops Manager" }}
-    >
+    <AppShell role={BACKOFFICE.role} active="Dispatch" user={BACKOFFICE.user}>
       <DispatchBoard />
     </AppShell>
   );

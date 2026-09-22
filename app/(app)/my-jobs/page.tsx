@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/shared/AppShell";
 import { MyJobs } from "@/components/technician/MyJobs";
+import { FIELD } from "@/lib/demo";
 
 /**
  * Technician "My Jobs" — the field flow: select job → acknowledge → arrive →
@@ -8,7 +9,7 @@ import { MyJobs } from "@/components/technician/MyJobs";
  */
 export default function MyJobsPage() {
   return (
-    <AppShell role="technician" active="My Jobs" user={{ name: "Rajesh", role: "Technician" }}>
+    <AppShell role={FIELD.role} active="My Jobs" user={FIELD.user}>
       <MyJobs />
     </AppShell>
   );

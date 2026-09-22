@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/shared/AppShell";
 import { AssetsBoard } from "@/components/assets/AssetsBoard";
+import { BACKOFFICE } from "@/lib/demo";
 
 /**
  * Assets — the admin asset register: list → detail with append-only history,
@@ -7,7 +8,7 @@ import { AssetsBoard } from "@/components/assets/AssetsBoard";
  */
 export default function AssetsPage() {
   return (
-    <AppShell role="admin" active="Assets" user={{ name: "Christine", role: "Admin" }}>
+    <AppShell role={BACKOFFICE.role} active="Assets" user={BACKOFFICE.user}>
       <AssetsBoard />
     </AppShell>
   );
